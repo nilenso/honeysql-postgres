@@ -2,6 +2,8 @@
   (:refer-clojure :exclude [format])
   (:require [honeysql.format :refer :all]))
 
+;; Extension of the honeysql format functions specifically for postgreSQL
+
 (def postgres-clause-priorities
   "Determines the order that clauses will be placed within generated SQL"
   {:with 30

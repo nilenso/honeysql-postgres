@@ -2,6 +2,8 @@
   (:refer-clojure :exclude [update])
   (:require [honeysql.helpers :refer :all]))
 
+;; Extension of the honeysql helper funcitons for postgreSQL
+
 (defn do-nothing [m]
   (assoc m :do-nothing []))
 
