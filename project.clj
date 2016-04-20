@@ -1,5 +1,5 @@
 (defproject honeysql-postgres "0.1.0-SNAPSHOT"
-  :description "PostgresSQL exrenstion for honeysql"
+  :description "PostgreSQL extension for honeysql"
   :url "https://github.com/nilenso/honeysql-postgres"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
