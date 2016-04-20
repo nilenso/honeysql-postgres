@@ -2,9 +2,30 @@
   (:refer-clojure :exclude [format])
   (:require [honeysql.format :refer :all]))
 
-;; Move the whole default priorities here ?
 (def postgres-clause-priorities
-  {:upsert 225
+  "Determines the order that clauses will be placed within generated SQL"
+  {:with 30
+   :with-recursive 40
+   :select 50
+   :insert-into 60
+   :update 70
+   :delete-from 80
+   :columns 90
+   :set 100
+   :from 110
+   :join 120
+   :left-join 130
+   :right-join 140
+   :full-join 150
+   :where 160
+   :group-by 170
+   :having 180
+   :order-by 190
+   :limit 200
+   :offset 210
+   :lock 215
+   :values 220
+   :upsert 225
    :on-conflict 230
    :on-conflict-constraint 230
    :do-update-set 235
@@ -13,8 +34,9 @@
    :returning 240
    :query-values 250})
 
-;; FIXME : Not sure if this is the best way to implement this, but since the `clause-store` is being used
+;; Not sure if this is the best way to implement this, but since the `clause-store` is being used
 ;; by format to decide the order of clauses, not really sure what would be a better implementation.
+;; Override the default cluse priority set by honeysql
 (doseq [[k v] postgres-clause-priorities]
   (register-clause! k v))
 
