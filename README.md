@@ -1,4 +1,5 @@
 # honeysql-postgres
+[![Clojars Project](https://img.shields.io/clojars/v/nilenso/honeysql-postgres.svg)](https://clojars.org/nilenso/honeysql-postgres)
 
 PostgreSQL extensions for [honeysql](https://github.com/jkk/honeysql). This library extends the features of honeysql to support postgres specific SQL clauses. Currently honeysql-postgres supports the following postgres specific clauses
 - UPSERT
