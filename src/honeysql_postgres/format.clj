@@ -66,7 +66,7 @@
 ;; fn-handler multimethods are called while using `types/call` like -> (types/call :name & args)
 ;; these are mostly use with sql function calls.
 
-;; takes :vale as an argument and -> "NOT value"
+;; takes :value as an argument and -> "NOT value"
 ;; eg - (types/call :not nil) -> "NOT NULL"
 (defmethod fn-handler "not" [_ value]
   (str "NOT " (to-sql value)))
@@ -105,6 +105,13 @@
 (defmethod fn-handler "constraint" [_ name]
   (str "CONSTRAINT " (to-sql name)))
 
+;; takes a value as an argument and -> "DEFAULT value"
+(defmethod fn-handler "default" [_ value]
+  (str "DEFAULT " (to-sql value)))
+
+;; takes value as an argument and -> "nextval('value')"
+(defmethod fn-handler "nextval" [_ value]
+  (str "nextval('" (to-sql value) "')"))
 ;; format-clause multimethods used to format various sql clauses as defined
 
 ;; takes :constraint as argument -> "ON CONFLICT ON CONSTRAINT constraint"

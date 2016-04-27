@@ -99,4 +99,10 @@
                               [:did :integer (sql/call :not nil)]
                               [:date_prod :date]
                               [:kind (sql/call :varchar 10)]])
+               sql/format))))
+  (testing "creating table with columns with default values"
+    (is (= ["CREATE TABLE distributors (did integer PRIMARY KEY DEFAULT nextval('serial'), name varchar(40) NOT NULL)"]
+           (-> (create-table :distributors)
+               (with-columns [[:did :integer (sql/call :primary-key) (sql/call :default (sql/call :nextval :serial))]
+                              [:name (sql/call :varchar 40) (sql/call :not nil)]])
                sql/format)))))
