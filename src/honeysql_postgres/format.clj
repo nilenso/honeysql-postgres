@@ -10,6 +10,7 @@
    :with-recursive 40
    :create-view 45
    :select 50
+   :over 55
    :insert-into 60
    :update 70
    :delete-from 80
@@ -21,6 +22,7 @@
    :right-join 140
    :full-join 150
    :where 160
+   :partition-by 165
    :group-by 170
    :having 180
    :order-by 190
@@ -179,3 +181,13 @@
   (str "DROP TABLE " (->> tables
                           (map to-sql)
                           comma-join)))
+
+;;
+(defmethod format-clause :over [[_ fields] _]
+  (str "OVER " (to-sql (get-first fields))))
+
+;;
+(defmethod format-clause :partition-by [[_ fields] _]
+  (str "PARTITION BY " (->> fields
+                            (map to-sql)
+                            comma-join)))

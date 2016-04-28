@@ -62,3 +62,11 @@
 ;; Can be supplied wtih 1 or more args - Eg : (drop-table :table1 :table2)
 (defhelper drop-table [m tablenames]
   (assoc m :drop-table (collify tablenames)))
+
+;;
+(defhelper over [m args]
+  (assoc m :over args))
+
+;;
+(defhelper partition-by [m fields]
+  (assoc m :partition-by (collify fields)))
