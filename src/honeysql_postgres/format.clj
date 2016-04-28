@@ -182,11 +182,11 @@
                           (map to-sql)
                           comma-join)))
 
-;;
+;; takes fields as argument and -> "OVER (fields)"
 (defmethod format-clause :over [[_ fields] _]
   (str "OVER " (to-sql (get-first fields))))
 
-;;
+;; takes fields as argument and -> "PARTITION BY field1, field2 ..."
 (defmethod format-clause :partition-by [[_ fields] _]
   (str "PARTITION BY " (->> fields
                             (map to-sql)

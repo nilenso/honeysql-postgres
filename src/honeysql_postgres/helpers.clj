@@ -63,10 +63,11 @@
 (defhelper drop-table [m tablenames]
   (assoc m :drop-table (collify tablenames)))
 
-;;
+;; assoc into m {:over args}
+;; args would be a map Eg : {:over {:parition-by salary :order-by id}}
 (defhelper over [m args]
   (assoc m :over args))
 
-;;
+;; assoc into m {:partition-by fields}
 (defhelper partition-by [m fields]
   (assoc m :partition-by (collify fields)))
