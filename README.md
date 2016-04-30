@@ -21,7 +21,7 @@ PostgreSQL extensions for [honeysql](https://github.com/jkk/honeysql). This libr
 ```clj
 [nilenso/honeysql-postgres "0.1.0-SNAPSHOT"]
 ```
-### Mave
+### Maven
 ```xml
 <dependency>
   <groupId>nilenso</groupId>
