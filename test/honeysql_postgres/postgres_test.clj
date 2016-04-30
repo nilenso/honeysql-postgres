@@ -105,6 +105,15 @@
            (-> (create-table :distributors)
                (with-columns [[:did :integer (sql/call :primary-key) (sql/call :default (sql/call :nextval :serial))]
                               [:name (sql/call :varchar 40) (sql/call :not nil)]])
+               sql/format))))
+  (testing "creating table with column checks"
+    (is (= ["CREATE TABLE products (product_no integer, name text, price numeric CHECK(price > 0), discounted_price numeric, CHECK(discounted_price > 0 AND price > discounted_price))"]
+           (-> (create-table :products)
+               (with-columns [[:product_no :integer]
+                              [:name :text]
+                              [:price :numeric (sql/call :check [:> :price 0])]
+                              [:discounted_price :numeric]
+                              [(sql/call :check [:> :discounted_price 0] [:> :price :discounted_price])]])
                sql/format)))))
 
 (deftest over-test

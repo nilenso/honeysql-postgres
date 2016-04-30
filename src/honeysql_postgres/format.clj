@@ -2,7 +2,7 @@
     honeysql-postgres.format
   (:refer-clojure :exclude [format partition-by])
   (:require [honeysql.format :refer :all]
-            [honeysql-postgres.util :refer [get-first comma-join-args]]))
+            [honeysql-postgres.util :refer [get-first comma-join-args prep-check]]))
 
 (def ^:private custom-additions
   {:create-view 45
@@ -86,6 +86,13 @@
 
 (defmethod fn-handler "nextval" [_ value]
   (str "nextval('" (to-sql value) "')"))
+
+(defmethod fn-handler "check" [_ & args]
+  (let [preds (format-predicate* (prep-check args))
+        pred-string (if (= 1 (count args))
+                      (paren-wrap preds)
+                      preds)]
+    (str "CHECK" pred-string)))
 
 
 ;; format-clause multimethods used to format various sql clauses as defined
