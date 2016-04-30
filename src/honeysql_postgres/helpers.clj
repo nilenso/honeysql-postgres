@@ -1,5 +1,5 @@
 (ns honeysql-postgres.helpers
-  (:refer-clojure :exclude [update])
+  (:refer-clojure :exclude [update partition-by])
   (:require [honeysql.helpers :refer :all]))
 
 ;; Extension of the honeysql helper funcitons for postgreSQL

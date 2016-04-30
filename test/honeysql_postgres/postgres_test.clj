@@ -1,5 +1,5 @@
 (ns honeysql-postgres.postgres-test
-  (:refer-clojure :exclude [update])
+  (:refer-clojure :exclude [update partition-by])
   (:require [honeysql-postgres.format :refer :all]
             [honeysql-postgres.helpers :refer :all]
             [honeysql.helpers :refer :all]
