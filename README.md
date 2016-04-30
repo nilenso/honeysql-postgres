@@ -124,53 +124,60 @@ The following are the SQL functions added in `honeysql-postgres`
 - not
 ```clj
 (sql/format (sql/call :not nil))
-=> "NOT NULL"
+=> ["NOT NULL"]
 ```
 - primary-key
 ```clj
 (sql/format (sql/call :primary-key))
-=> "PRIMARY KEY"
+=> ["PRIMARY KEY"]
 
 (sql/format (sql/call :primary-key :arg1 :arg2 ... ))
-=> "PRIMARY KEY (arg1, arg2, ... )"
+=> ["PRIMARY KEY (arg1, arg2, ... )"]
 ```
 - unique
 ```clj
 (sql/format (sql/call :unique))
-=> "UNIQUE"
+=> ["UNIQUE"]
 
 (sql/format (sql/call :unique :arg1 :arg2 ... ))
-=> "UNIQUE (arg1, arg2, ... )"
+=> ["UNIQUE (arg1, arg2, ... )"]
 ```
 - foreign-key
 ```clj
 (sql/format (sql/call :foreign-key))
-=> "FOREIGN KEY"
+=> ["FOREIGN KEY"]
 
 (sql/format (sql/call :foreign-key :arg1 :arg2 ... ))
-=> "FOREIGN KEY (arg1, arg2, ... )"
+=> ["FOREIGN KEY (arg1, arg2, ... )"]
 ```
 - references
 ```clj
 (sql/format (sql/call :references :reftable :refcolumn))
-=> "REFERENCES reftable(refcolumn)"
+=> ["REFERENCES reftable(refcolumn)"]
 ```
 - constraint
 ```clj
 (sql/format (sql/call :constraint :name))
-=> "CONSTRAINT name"
+=> ["CONSTRAINT name"]
 ```
 - default
 ```clj
 (sql/format (sql/call :default value))
-"DEFAULT value"
+=> ["DEFAULT value"]
 ```
 - nextval
 ```clj
-(sql/format (sql/value :nextval value))
-"nextval('value')"
+(sql/format (sql/call :nextval value))
+=> ["nextval('value')"]
 ```
+- check
+```
+(sql/format (sql/call :check [:= :a :b]))
+=> ["CHECK(a = b)"]
 
+(sql/format (sql/call :check [:= :a :b] [:= :c :d]))
+["CHECK(a = b AND c = d)"]
+```
 ## License
 
 Copyright © 2016 Nilenso
