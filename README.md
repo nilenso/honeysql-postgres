@@ -1,7 +1,9 @@
 # honeysql-postgres
 [![Clojars Project](https://img.shields.io/clojars/v/nilenso/honeysql-postgres.svg)](https://clojars.org/nilenso/honeysql-postgres)
 
-PostgreSQL extensions for [honeysql](https://github.com/jkk/honeysql). This library extends the features of honeysql to support postgres specific SQL clauses. Currently honeysql-postgres supports the following postgres specific clauses
+PostgreSQL extensions for widely used [honeysql](https://github.com/jkk/honeysql). This library extends the features of honeysql to support postgres specific SQL clauses and some basic SQL DDL in addition to the ones supported by the parent library. This library exists because it felt having a separate vendor specific namespace rather over having everything within honeysql.
+
+Currently honeysql-postgres supports the following postgres specific clauses
 
 - upsert
   - on conflict
@@ -29,7 +31,7 @@ PostgreSQL extensions for [honeysql](https://github.com/jkk/honeysql). This libr
   <version>0.1.0-SNAPSHOT</version>
 </dependency>
 ```
-
+### repl
 ```clj
 (require '[honeysql.core :as sql]
          '[honeysql.helpers :refer :all]
