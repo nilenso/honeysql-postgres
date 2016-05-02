@@ -171,7 +171,7 @@ The following are the SQL functions added in `honeysql-postgres`
 => ["nextval('value')"]
 ```
 - check
-```
+```clj
 (sql/format (sql/call :check [:= :a :b]))
 => ["CHECK(a = b)"]
 

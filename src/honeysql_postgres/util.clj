@@ -22,14 +22,17 @@
          comma-join
          paren-wrap)))
 
-(defn prep-check [args]
+(defn prep-check
+  "Adds a logical `:and` operation if args has multiple vectors
+   Eg - (prep-check '([:= :a :b])) => [:= :a :b]
+        (prep-check '([:= :a :b] [:< :a :c])) => [:and [:= :a :b] [:< :a :c]]"
+  [args]
   (let [preds (if (= 1 (count args))
                   (first args)
                   args)
         [logic-op preds] (if (keyword? (first preds))
                            [(first preds) (rest preds)]
-                           [:and preds])
-        pred (if (= 1 (count preds))
-               (first preds)
-               (into [logic-op] preds))]
-    pred))
+                           [:and preds])]
+    (if (= 1 (count preds))
+      (first preds)
+      (into [logic-op] preds))))
