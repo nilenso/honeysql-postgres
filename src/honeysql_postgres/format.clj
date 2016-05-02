@@ -1,85 +1,159 @@
-(ns honeysql-postgres.format
-  (:refer-clojure :exclude [format])
-  (:require [honeysql.format :refer :all]))
+(ns ^{:doc "Extension of the honeysql format functions specifically for postgreSQL"}
+    honeysql-postgres.format
+  (:refer-clojure :exclude [format partition-by])
+  (:require [honeysql.format :refer :all]
+            [honeysql-postgres.util :refer [get-first comma-join-args prep-check]]))
 
-;; Extension of the honeysql format functions specifically for postgreSQL
-
-(def postgres-clause-priorities
-  "Determines the order that clauses will be placed within generated SQL"
-  {:with 30
-   :with-recursive 40
-   :select 50
-   :insert-into 60
-   :update 70
-   :delete-from 80
-   :columns 90
-   :set 100
-   :from 110
-   :join 120
-   :left-join 130
-   :right-join 140
-   :full-join 150
-   :where 160
-   :group-by 170
-   :having 180
-   :order-by 190
-   :limit 200
-   :offset 210
-   :lock 215
-   :values 220
-   :upsert 225
+(def ^:private custom-additions
+  {:create-view 45
+   :over 55
+   :partition-by 165
    :on-conflict 230
    :on-conflict-constraint 230
    :do-update-set 235
    :do-update-set! 235
    :do-nothing 235
-   :returning 240
-   :query-values 250})
+   :returning 240})
+
+(def ^:private postgres-clause-priorities
+  "Determines the order that clauses will be placed within generated SQL"
+  (merge {:with 30
+          :with-recursive 40
+          :select 50
+          :insert-into 60
+          :update 70
+          :delete-from 80
+          :columns 90
+          :set 100
+          :from 110
+          :join 120
+          :left-join 130
+          :right-join 140
+          :full-join 150
+          :where 160
+          :group-by 170
+          :having 180
+          :order-by 190
+          :limit 200
+          :offset 210
+          :lock 215
+          :values 220
+          :upsert 225
+          :on-conflict 230
+          :on-conflict-constraint 230
+          :do-update-set 235
+          :do-update-set! 235
+          :do-nothing 235
+          :returning 240
+          :query-values 250}
+         custom-additions))
 
 ;; Not sure if this is the best way to implement this, but since the `clause-store` is being used
 ;; by format to decide the order of clauses, not really sure what would be a better implementation.
 ;; Override the default cluse priority set by honeysql
-(doseq [[k v] postgres-clause-priorities]
-  (register-clause! k v))
+(defn override-default-clause-priority []
+  (doseq [[k v] postgres-clause-priorities]
+    (register-clause! k v)))
 
-(defn get-first [x]
-  (if (coll? x)
-    (first x)
-    x))
+;; TODO : Add create-table, drop-table and its clauses to the priority clause map
+
+(defmethod fn-handler "not" [_ value]
+  (str "NOT " (to-sql value)))
+
+;; (defmethod fn-handler "char" [_ size]
+  ;; (str "char(" (to-sql size) ")"))
+
+;; (defmethod fn-handler "varchar" [_ size]
+  ;; (str "varchar(" (to-sql size) ")"))
+
+(defmethod fn-handler "primary-key" [_ & args]
+  (str "PRIMARY KEY" (comma-join-args args)))
+
+(defmethod fn-handler "unique" [_ & args]
+  (str "UNIQUE" (comma-join-args args)))
+
+(defmethod fn-handler "foreign-key" [_ & args]
+  (str "FOREIGN KEY" (comma-join-args args)))
+
+(defmethod fn-handler "references" [_ reftable refcolumn]
+  (str "REFERENCES " (to-sql reftable) (paren-wrap (to-sql refcolumn))))
+
+(defmethod fn-handler "constraint" [_ name]
+  (str "CONSTRAINT " (to-sql name)))
+
+(defmethod fn-handler "default" [_ value]
+  (str "DEFAULT " (to-sql value)))
+
+(defmethod fn-handler "nextval" [_ value]
+  (str "nextval('" (to-sql value) "')"))
+
+(defmethod fn-handler "check" [_ & args]
+  (let [preds (format-predicate* (prep-check args))
+        pred-string (if (= 1 (count args))
+                      (paren-wrap preds)
+                      preds)]
+    (str "CHECK" pred-string)))
+
+
+;; format-clause multimethods used to format various sql clauses as defined
 
 (defmethod format-clause :on-conflict-constraint [[_ k] _]
   (str "ON CONFLICT ON CONSTRAINT " (-> k
                                         get-first
                                         to-sql)))
 
-(defmethod format-clause :on-conflict [[_ id] _]
-  (str "ON CONFLICT (" (-> id
-                           get-first
-                           to-sql) ")"))
+(defmethod format-clause :on-conflict [[_ ids] _]
+  (str "ON CONFLICT " (comma-join-args ids)))
 
 (defmethod format-clause :do-nothing [_ _]
   "DO NOTHING")
 
-;; Used when there is a need to update the columns with modified values if the
-;; row(id) already exits - accepts a map of column and value
 (defmethod format-clause :do-update-set! [[_ values] _]
   (str "DO UPDATE SET " (comma-join (for [[k v] values]
                                       (str (to-sql k) " = " (to-sql v))))))
 
-;; Used when it is a simple upsert - accepts a vector of columns
 (defmethod format-clause :do-update-set [[_ values] _]
   (str "DO UPDATE SET "
        (comma-join (map #(str (to-sql %) " = EXCLUDED." (to-sql %))
                         values))))
 
-(defn format-upsert-clause [upsert]
+(defn- format-upsert-clause [upsert]
   (let [ks (keys upsert)]
     (map #(format-clause % (find upsert %)) upsert)))
 
-;; Accepts a map with the following possible keys
-;; :on-conflict, :do-update-set or :do-update-set! or :do-nothing
 (defmethod format-clause :upsert [[_ upsert] _]
   (space-join (format-upsert-clause upsert)))
 
 (defmethod format-clause :returning [[_ fields] _]
   (str "RETURNING " (comma-join (map to-sql fields))))
+
+(defmethod format-clause :create-view [[_ viewname] _]
+  (str "CREATE VIEW " (-> viewname
+                          get-first
+                          to-sql) " AS"))
+
+(defmethod format-clause :create-table [[_ tablename] _]
+  (str "CREATE TABLE " (-> tablename
+                           get-first
+                           to-sql)))
+
+(defmethod format-clause :with-columns [[_ columns] _]
+  (paren-wrap (->> columns
+                   get-first
+                   (map #(space-join (map to-sql %)))
+                   comma-join)))
+
+(defmethod format-clause :drop-table [[_ tables] _]
+  (str "DROP TABLE " (->> tables
+                          (map to-sql)
+                          comma-join)))
+
+(defmethod format-clause :over [[_ fields] _]
+  (str "OVER " (to-sql (get-first fields))))
+
+(defmethod format-clause :partition-by [[_ fields] _]
+  (str "PARTITION BY " (->> fields
+                            (map to-sql)
+                            comma-join)))
+
+(override-default-clause-priority)
