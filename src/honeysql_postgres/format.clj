@@ -1,3 +1,4 @@
+
 (ns ^{:doc "Extension of the honeysql format functions specifically for postgreSQL"}
     honeysql-postgres.format
   (:refer-clojure :exclude [format partition-by])
@@ -48,23 +49,14 @@
           :query-values 250}
          custom-additions))
 
-;; Not sure if this is the best way to implement this, but since the `clause-store` is being used
-;; by format to decide the order of clauses, not really sure what would be a better implementation.
-;; Override the default cluse priority set by honeysql
-(defn override-default-clause-priority []
+(defn override-default-clause-priority
+  "Override the default cluse priority set by honeysql"
+  []
   (doseq [[k v] postgres-clause-priorities]
     (register-clause! k v)))
 
-;; TODO : Add create-table, drop-table and its clauses to the priority clause map
-
 (defmethod fn-handler "not" [_ value]
   (str "NOT " (to-sql value)))
-
-;; (defmethod fn-handler "char" [_ size]
-  ;; (str "char(" (to-sql size) ")"))
-
-;; (defmethod fn-handler "varchar" [_ size]
-  ;; (str "varchar(" (to-sql size) ")"))
 
 (defmethod fn-handler "primary-key" [_ & args]
   (str "PRIMARY KEY" (comma-join-args args)))
@@ -93,7 +85,6 @@
                       (paren-wrap preds)
                       preds)]
     (str "CHECK" pred-string)))
-
 
 ;; format-clause multimethods used to format various sql clauses as defined
 
