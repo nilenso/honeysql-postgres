@@ -147,4 +147,14 @@
                             (map to-sql)
                             comma-join)))
 
+(defmethod format-clause :alter-table [[_ tablename] _]
+  (str "ALTER TABLE " (-> tablename
+                          get-first
+                          to-sql)))
+
+(defmethod format-clause :add-column [[_ fields] _]
+  (str "ADD COLUMN " (->> fields
+                         (map to-sql)
+                         space-join)))
+
 (override-default-clause-priority)

@@ -45,3 +45,9 @@
 
 (defhelper partition-by [m fields]
   (assoc m :partition-by (collify fields)))
+
+(defhelper alter-table [m fields]
+  (assoc m :alter-table (collify fields)))
+
+(defhelper add-column [m fields]
+  (assoc m :add-column (collify fields)))

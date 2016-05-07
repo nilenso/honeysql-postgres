@@ -124,3 +124,10 @@
                          (order-by [:salary :desc])))
                (from :employees)
                sql/format)))))
+
+(deftest alter-table-test
+  (testing "alter table add column generates the required sql"
+    (is (= ["ALTER TABLE employees ADD COLUMN address text"]
+           (-> (alter-table :employees)
+               (add-column :address :text)
+               sql/format)))))
