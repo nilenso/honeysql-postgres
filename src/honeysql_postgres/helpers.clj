@@ -51,3 +51,6 @@
 
 (defhelper add-column [m fields]
   (assoc m :add-column (collify fields)))
+
+(defhelper drop-column [m fields]
+  (assoc m :drop-column (collify fields)))

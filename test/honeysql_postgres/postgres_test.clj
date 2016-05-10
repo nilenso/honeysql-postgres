@@ -130,4 +130,9 @@
     (is (= ["ALTER TABLE employees ADD COLUMN address text"]
            (-> (alter-table :employees)
                (add-column :address :text)
+               sql/format))))
+  (testing "alter table drop column generates the required sql"
+    (is (= ["ALTER TABLE employees DROP COLUMN address"]
+           (-> (alter-table :employees)
+               (drop-column :address)
                sql/format)))))

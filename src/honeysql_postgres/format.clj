@@ -157,4 +157,9 @@
                          (map to-sql)
                          space-join)))
 
+(defmethod format-clause :drop-column [[_ fields] _]
+  (str "DROP COLUMN " (->> fields
+                           get-first
+                           to-sql)))
+
 (override-default-clause-priority)
