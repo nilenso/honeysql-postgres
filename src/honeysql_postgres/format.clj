@@ -6,9 +6,15 @@
             [honeysql-postgres.util :refer [get-first comma-join-args prep-check]]))
 
 (def ^:private custom-additions
-  {:create-view 45
+  {:create-table 10
+   :drop-table 10
+   :alter-table 20
+   :add-column 30
+   :drop-column 40
+   :create-view 40
    :over 55
    :partition-by 165
+   :upsert 225
    :on-conflict 230
    :on-conflict-constraint 230
    :do-update-set 235
@@ -39,13 +45,6 @@
           :offset 210
           :lock 215
           :values 220
-          :upsert 225
-          :on-conflict 230
-          :on-conflict-constraint 230
-          :do-update-set 235
-          :do-update-set! 235
-          :do-nothing 235
-          :returning 240
           :query-values 250}
          custom-additions))
 
