@@ -1,3 +1,10 @@
+
+## 0.2.1-SNAPSHOT
+- Added the following
+  - alter-table
+  - add-column
+  - drop-column
+
 ## 0.2.0
 - Added the following helpers and corresponding clauses
   - partition by

@@ -16,19 +16,22 @@ Currently honeysql-postgres supports the following postgres specific clauses
 - create view
 - create table
 - drop table
+- alter table
+  - add column
+  - drop column
 
 ## Usage
 
 ### Leiningen
 ```clj
-[nilenso/honeysql-postgres "0.2.0"]
+[nilenso/honeysql-postgres "0.2.1-SNAPSHOT"]
 ```
 ### Maven
 ```xml
 <dependency>
   <groupId>nilenso</groupId>
   <artifactId>honeysql-postgres</artifactId>
-  <version>0.2.0</version>
+  <version>0.2.1-SNAPSHOT</version>
 </dependency>
 ```
 ### repl
@@ -118,6 +121,19 @@ You can make use of `over` and `partition-by` to write window functions
 => ["DROP TABLE cities, towns, vilages"]
 ```
 
+### alter table
+use `alter-table` along with `add-column` & `drop-column` to modify table level details
+```clj
+(-> (alter-table :employees)
+    (add-column :address :text)
+    sql/format)
+=> ["ALTER TABLE employees ADD COLUMN address text"]
+
+(-> (alter-table :employees)
+    (drop-column :address)
+    sql/format)
+["ALTER TABLE employees DROP COLUMN address"]
+```
 
 ### SQL functions
 The following are the SQL functions added in `honeysql-postgres`
