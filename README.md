@@ -132,7 +132,7 @@ use `alter-table` along with `add-column` & `drop-column` to modify table level 
 (-> (alter-table :employees)
     (drop-column :address)
     sql/format)
-["ALTER TABLE employees DROP COLUMN address"]
+=> ["ALTER TABLE employees DROP COLUMN address"]
 ```
 
 ### SQL functions
