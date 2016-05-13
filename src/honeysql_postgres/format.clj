@@ -161,4 +161,12 @@
                            get-first
                            to-sql)))
 
+(defmethod format-clause :rename-column [[_ [oldname newname]] _]
+  (str "RENAME COLUMN " (to-sql oldname) " TO " (to-sql newname)))
+
+(defmethod format-clause :rename-table [[_ newname] _]
+  (str "RENAME TO " (-> newname
+                        get-first
+                        to-sql)))
+
 (override-default-clause-priority)

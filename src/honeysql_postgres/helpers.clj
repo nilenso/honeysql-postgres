@@ -54,3 +54,9 @@
 
 (defhelper drop-column [m fields]
   (assoc m :drop-column (collify fields)))
+
+(defhelper rename-column [m fields]
+  (assoc m :rename-column fields))
+
+(defhelper rename-table [m fields]
+  (assoc m :rename-table (collify fields)))
