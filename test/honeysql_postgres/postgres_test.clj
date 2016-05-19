@@ -124,3 +124,25 @@
                          (order-by [:salary :desc])))
                (from :employees)
                sql/format)))))
+
+(deftest alter-table-test
+  (testing "alter table add column generates the required sql"
+    (is (= ["ALTER TABLE employees ADD COLUMN address text"]
+           (-> (alter-table :employees)
+               (add-column :address :text)
+               sql/format))))
+  (testing "alter table drop column generates the required sql"
+    (is (= ["ALTER TABLE employees DROP COLUMN address"]
+           (-> (alter-table :employees)
+               (drop-column :address)
+               sql/format))))
+  (testing "alter table rename column generates the requred sql"
+    (is (= ["ALTER TABLE employees RENAME COLUMN address TO homeaddress"]
+           (-> (alter-table :employees)
+               (rename-column :address :homeaddress)
+               sql/format))))
+  (testing "alter table rename table generates the required sql"
+    (is (= ["ALTER TABLE employees RENAME TO managers"]
+           (-> (alter-table :employees)
+               (rename-table :managers)
+               sql/format)))))
