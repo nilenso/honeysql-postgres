@@ -118,11 +118,13 @@
 
 (deftest over-test
   (testing "window function over on select statemt"
-    (is (= ["SELECT last_name, salary, department, rank() OVER (PARTITION BY department ORDER BY salary DESC) FROM employees"]
-           (-> (select :last_name :salary :department (sql/call :rank))
-               (over (-> (partition-by :department)
-                         (order-by [:salary :desc])))
-               (from :employees)
+    (is (= ["SELECT id , avg(salary) OVER (PARTITION BY department ORDER BY designation) AS Average, max(salary) OVER w AS MaxSalary FROM employee WINDOW w AS (PARTITION BY department)"]
+           (-> (select :id)
+               (over
+                [(sql/call :avg :salary) (-> (partition-by :department) (order-by [:designation])) :Average]
+                [(sql/call :max :salary) :w :MaxSalary])
+               (from :employee)
+               (window :w (partition-by :department))
                sql/format)))))
 
 (deftest alter-table-test
