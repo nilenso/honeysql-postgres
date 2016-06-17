@@ -14,6 +14,7 @@
    :create-view 40
    :over 55
    :partition-by 165
+   :window 195
    :upsert 225
    :on-conflict 230
    :on-conflict-constraint 230
@@ -138,8 +139,25 @@
                           (map to-sql)
                           comma-join)))
 
-(defmethod format-clause :over [[_ fields] _]
-  (str "OVER " (to-sql (get-first fields))))
+(defn- format-over-clause [exp]
+  (str
+   (-> exp first to-sql)
+   " OVER "
+   (-> exp second to-sql)
+   (when-let [alias (-> exp rest second)]
+     (str " AS " (to-sql alias)))))
+
+(defmethod format-clause :over [[_ fields] complete-sql-map]
+  (str
+   ;; if the select clause has any columns in it then add a comma before the
+   ;; window functions
+   (if (seq (:select complete-sql-map)) ", ")
+   (->> fields
+        (map format-over-clause)
+        comma-join)))
+
+(defmethod format-clause :window [[_ [window-name fields]] _]
+  (str "WINDOW " (to-sql window-name) " AS " (to-sql fields)))
 
 (defmethod format-clause :partition-by [[_ fields] _]
   (str "PARTITION BY " (->> fields
