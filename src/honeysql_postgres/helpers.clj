@@ -41,7 +41,10 @@
   (assoc m :drop-table (collify tablenames)))
 
 (defhelper over [m args]
-  (assoc m :over args))
+  (assoc m :over (collify args)))
+
+(defhelper window [m args]
+  (assoc m :window args))
 
 (defhelper partition-by [m fields]
   (assoc m :partition-by (collify fields)))

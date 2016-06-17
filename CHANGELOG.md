@@ -1,4 +1,10 @@
 
+## 0.2.2-SNAPSHOT
+- Breaking change (Revised implementation)
+  - over
+- Added the following
+  - window
+
 ## 0.2.1-SNAPSHOT
 - Added the following
   - alter-table
