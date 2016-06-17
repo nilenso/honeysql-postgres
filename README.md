@@ -12,7 +12,8 @@ Currently honeysql-postgres supports the following postgres specific clauses
   - do nothing
 - returning
 - partition by
-- over (window function)
+- over
+- window
 - create view
 - create table
 - drop table
@@ -24,14 +25,14 @@ Currently honeysql-postgres supports the following postgres specific clauses
 
 ### Leiningen
 ```clj
-[nilenso/honeysql-postgres "0.2.1-SNAPSHOT"]
+[nilenso/honeysql-postgres "0.2.2-SNAPSHOT"]
 ```
 ### Maven
 ```xml
 <dependency>
   <groupId>nilenso</groupId>
   <artifactId>honeysql-postgres</artifactId>
-  <version>0.2.1-SNAPSHOT</version>
+  <version>0.2.2-SNAPSHOT</version>
 </dependency>
 ```
 ### repl
@@ -41,6 +42,9 @@ Currently honeysql-postgres supports the following postgres specific clauses
          '[honeysql-postgres.format :refer :all]
          '[honeysql-postgres.helpers :refer :all])
 ```
+
+### Breaking Change from 0.2.1
+Implementation of `over` has been changed to accept alias as an option and define the aggregator-function within the over clause and not in the select clause, this allows the inclusion of multiple window-function which was not possible in the previous implementation.
 
 The query creation and usage is exactly the same as honeysql.
 
@@ -80,14 +84,16 @@ Most of the times the above can also be written without the `upsert` helper func
 ```
 
 ### over
-You can make use of `over` and `partition-by` to write window functions
+You can make use of `over` to write window functions where it takes in vectors with aggregator functions and window functions along with optional alias like `(over [aggregator-function window-function alias])`, the can be coupled with the `window` clause to write window-function functions with alias that is later defines the window-function, like `(-> (over [aggregator-function :w]) (window :w window-function))`.
 ```clj
-(-> (select :last_name :salary :department (sql/call :rank))
-    (over (-> (partition-by :department)
-              (order-by [:salary :desc])))
-    (from :employees)
-    sql/format)
-=> ["SELECT last_name, salary, department, rank() OVER (PARTITION BY department ORDER BY salary DESC) FROM employees"]
+(-> (select :id)
+               (over
+                [(sql/call :avg :salary) (-> (partition-by :department) (order-by [:designation])) :Average]
+                [(sql/call :max :salary) :w :MaxSalary])
+               (from :employee)
+               (window :w (partition-by :department))
+               sql/format)
+=> ["SELECT id , avg(salary) OVER (PARTITION BY department ORDER BY designation) AS Average, max(salary) OVER w AS MaxSalary FROM employee WINDOW w AS (PARTITION BY department)"]
 ```
 
 ### create view
