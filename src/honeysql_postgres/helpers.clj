@@ -11,7 +11,7 @@
 (defhelper do-update-set [m args]
   (assoc m :do-update-set (collify args)))
 
-(defhelper db-update-set! [m args]
+(defhelper do-update-set! [m args]
   (assoc m :do-update-set! args))
 
 (defhelper on-conflict [m args]

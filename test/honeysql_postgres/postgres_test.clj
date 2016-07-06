@@ -8,13 +8,13 @@
 
 (deftest upsert-test
   (testing "upsert sql generation for postgresql"
-    (is (= ["INSERT INTO distributors d (did, dname) VALUES (5, ?), (6, ?) ON CONFLICT (did) DO UPDATE SET dname = EXCLUDED.dname RETURNING d.*" "Gizmo Transglobal" "Associated Computing, Inc"]
-           (-> (insert-into [:distributors :d])
+    (is (= ["INSERT INTO distributors (did, dname) VALUES (5, ?), (6, ?) ON CONFLICT (did) DO UPDATE SET dname = EXCLUDED.dname RETURNING *" "Gizmo Transglobal" "Associated Computing, Inc"]
+           (-> (insert-into :distributors)
                (values [{:did 5 :dname "Gizmo Transglobal"}
                         {:did 6 :dname "Associated Computing, Inc"}])
                (upsert (-> (on-conflict :did)
                            (do-update-set :dname)))
-               (returning :d.*)
+               (returning :*)
                sql/format)))
     (is (= ["INSERT INTO distributors (did, dname) VALUES (7, ?) ON CONFLICT (did) DO NOTHING" "Redline GmbH"]
            (-> (insert-into :distributors)
@@ -33,7 +33,13 @@
                         :values [{:did 10 :dname "Pinp Design"}
                                  {:did 11 :dname "Foo Bar Works"}]
                         :upsert {:on-conflict [:did]
-                                 :do-update-set [:dname]}})))))
+                                 :do-update-set [:dname]}})))
+    (is (= ["INSERT INTO distributors (did, dname) VALUES (23, ?) ON CONFLICT (did) DO UPDATE SET dname = ?" "Foo Distributors" "EXCLUDED.dname || ' (formerly ' || d.dname || ')'"]
+           (-> (insert-into :distributors)
+               (values [{:did 23 :dname "Foo Distributors"}])
+               (on-conflict :did)
+               (do-update-set! [:dname "EXCLUDED.dname || ' (formerly ' || d.dname || ')'"])
+               sql/format)))))
 
 (deftest returning-test
   (testing "returning clause in sql generation for postgresql"

@@ -49,38 +49,23 @@ Implementation of `over` has been changed to accept alias as an option and defin
 The query creation and usage is exactly the same as honeysql.
 
 ### upsert
-`upsert` would be ideally written
+`upsert` would be ideally written either way. You can make use of `do-update-set!` over `do-update-set`, if you want to modify the some column values in case of conflicts.
 ```clj
-(-> (insert-into [:distributors :d]
+(-> (insert-into :distributors)
     (values [{:did 5 :dname "Gizmo Transglobal"}
              {:did 6 :dname "Associated Computing, Inc"}])
     (upsert (-> (on-conflict :did)
                 (do-update-set :dname)))
-    (returning :d.*)
+    (returning :*)
     sql/format)
-=> ["INSERT INTO distributors d (did, dname) VALUES (5, ?), (6, ?) ON CONFLICT (did) DO UPDATE SET dname = EXCLUDED.dname RETURNING d.*" "Gizmo Transglobal" "Associated Computing, Inc"]
-```
+=> ["INSERT INTO distributors (did, dname) VALUES (5, ?), (6, ?) ON CONFLICT (did) DO UPDATE SET dname = EXCLUDED.dname RETURNING *" "Gizmo Transglobal" "Associated Computing, Inc"]
 
-Most of the times the above can also be written without the `upsert` helper function, you would need the `upsert` helper function only when you have sub queries or `where` clause within the upsert.
-```clj
-(-> (insert-into [:distributors :d])
-    (values [{:did 5 :dname "Gizmo Transglobal"}
-             {:did 6 :dname "Associated Computing, Inc"}])
+(-> (insert-into :distributors)
+    (values [{:did 23 :dname "Foo Distributors"}])
     (on-conflict :did)
-    (do-update-set :dname)
-    (returning :d.*)
+    (do-update-set! [:dname "EXCLUDED.dname || ' (formerly ' || d.dname || ')'"])
     sql/format)
-=> ["INSERT INTO distributors d (did, dname) VALUES (5, ?), (6, ?) ON CONFLICT (did) DO UPDATE SET dname = EXCLUDED.dname RETURNING d.*" "Gizmo Transglobal" "Associated Computing, Inc"]
-
-(-> (insert-into [:distributors :d])
-    (values [{:did 5 :dname "Gizmo Transglobal"}
-             {:did 6 :dname "Associated Computing, Inc"}])
-    (upsert (-> (on-conflict :did)
-                (do-update-set :dname)
-                (where [:<> :d.zipcode "21201"])))
-    (returning :d.*)
-    sql/format)
-=> ["INSERT INTO distributors d (did, dname) VALUES (5, ?), (6, ?) ON CONFLICT (did) DO UPDATE SET dname = EXCLUDED.dname WHERE d.zipcode <> ? RETURNING d.*" "Gizmo Transglobal" "Associated Computing, Inc" "21201"]
+=> ["INSERT INTO distributors (did, dname) VALUES (23, ?) ON CONFLICT (did) DO UPDATE SET dname = ?" "Foo Distributors" "EXCLUDED.dname || ' (formerly ' || d.dname || ')'"]
 ```
 
 ### over
