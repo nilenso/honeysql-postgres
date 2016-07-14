@@ -154,3 +154,15 @@
            (-> (alter-table :employees)
                (rename-table :managers)
                sql/format)))))
+
+(deftest insert-into-with-alias
+  (testing "insert into with alias"
+    (is (= ["INSERT INTO distributors AS d (did, dname) VALUES (5, ?), (6, ?) ON CONFLICT (did) DO UPDATE SET dname = EXCLUDED.dname WHERE d.zipcode <> ? RETURNING d.*" "Gizmo Transglobal" "Associated Computing, Inc" "21201"]
+           (-> (insert-into-as :distributors :d)
+               (values [{:did 5 :dname "Gizmo Transglobal"}
+                        {:did 6 :dname "Associated Computing, Inc"}])
+               (upsert (-> (on-conflict :did)
+                           (do-update-set :dname)
+                           (where [:<> :d.zipcode "21201"])))
+               (returning :d.*)
+               sql/format)))))

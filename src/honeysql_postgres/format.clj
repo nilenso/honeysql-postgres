@@ -12,6 +12,7 @@
    :add-column 30
    :drop-column 40
    :create-view 40
+   :insert-into-as 60
    :over 55
    :partition-by 165
    :window 195
@@ -186,5 +187,8 @@
   (str "RENAME TO " (-> newname
                         get-first
                         to-sql)))
+
+(defmethod format-clause :insert-into-as [[_ [table-name table-alias]] _]
+  (str  "INSERT INTO " (to-sql table-name) " AS " (to-sql table-alias)))
 
 (override-default-clause-priority)

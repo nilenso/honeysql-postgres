@@ -63,3 +63,6 @@
 
 (defhelper rename-table [m fields]
   (assoc m :rename-table (collify fields)))
+
+(defhelper insert-into-as [m fields]
+  (assoc m :insert-into-as (collify fields)))
