@@ -20,19 +20,21 @@ Currently honeysql-postgres supports the following postgres specific clauses
 - alter table
   - add column
   - drop column
+  - rename column
+- insert-into-as
 
 ## Usage
 
 ### Leiningen
 ```clj
-[nilenso/honeysql-postgres "0.2.2-SNAPSHOT"]
+[nilenso/honeysql-postgres "0.2.2"]
 ```
 ### Maven
 ```xml
 <dependency>
   <groupId>nilenso</groupId>
   <artifactId>honeysql-postgres</artifactId>
-  <version>0.2.2-SNAPSHOT</version>
+  <version>0.2.2</version>
 </dependency>
 ```
 ### repl
@@ -43,13 +45,13 @@ Currently honeysql-postgres supports the following postgres specific clauses
          '[honeysql-postgres.helpers :refer :all])
 ```
 
-### Breaking Change from 0.2.1
-Implementation of `over` has been changed to accept alias as an option and define the aggregator-function within the over clause and not in the select clause, this allows the inclusion of multiple window-function which was not possible in the previous implementation.
+### Breaking Change
+Implementation of `over` has been changed (from 0.2.2) to accept alias as an option and define the aggregator-function within the over clause and not in the select clause, this allows the inclusion of multiple window-function which was not possible in the previous implementation.
 
 The query creation and usage is exactly the same as honeysql.
 
 ### upsert
-`upsert` would be ideally written either way. You can make use of `do-update-set!` over `do-update-set`, if you want to modify the some column values in case of conflicts.
+`upsert` can be written either way. You can make use of `do-update-set!` over `do-update-set`, if you want to modify the some column values in case of conflicts.
 ```clj
 (-> (insert-into :distributors)
     (values [{:did 5 :dname "Gizmo Transglobal"}
@@ -66,6 +68,20 @@ The query creation and usage is exactly the same as honeysql.
     (do-update-set! [:dname "EXCLUDED.dname || ' (formerly ' || d.dname || ')'"])
     sql/format)
 => ["INSERT INTO distributors (did, dname) VALUES (23, ?) ON CONFLICT (did) DO UPDATE SET dname = ?" "Foo Distributors" "EXCLUDED.dname || ' (formerly ' || d.dname || ')'"]
+```
+
+### insert into with alias
+`insert-into-as` can be used to write insert statements with table name aliased.
+```clj
+(-> (insert-into-as :distributors :d)
+    (values [{:did 5 :dname "Gizmo Transglobal"}
+             {:did 6 :dname "Associated Computing, Inc"}])
+    (upsert (-> (on-conflict :did)
+                (do-update-set :dname)
+                (where [:<> :d.zipcode "21201"])))
+    (returning :d.*)
+    sql/format)
+=> ["INSERT INTO distributors AS d (did, dname) VALUES (5, ?), (6, ?) ON CONFLICT (did) DO UPDATE SET dname = EXCLUDED.dname WHERE d.zipcode <> ? RETURNING d.*" "Gizmo Transglobal" "Associated Computing, Inc" "21201"]
 ```
 
 ### over
