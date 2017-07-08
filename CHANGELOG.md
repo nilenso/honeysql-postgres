@@ -1,3 +1,5 @@
+## 0.2.3
+- Allows where clause to be used as an index predicate and update condition during upsert
 
 ## 0.2.2-SNAPSHOT
 - Breaking change (Revised implementation)
