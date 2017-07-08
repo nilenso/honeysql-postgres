@@ -105,9 +105,12 @@
                                       (str (to-sql k) " = " (to-sql v))))))
 
 (defmethod format-clause :do-update-set [[_ values] _]
-  (str "DO UPDATE SET "
-       (comma-join (map #(str (to-sql %) " = EXCLUDED." (to-sql %))
-                        values))))
+  (let [fields (or (:fields values) values)
+        where  (:where values)]
+    (str "DO UPDATE SET "
+      (comma-join (map #(str (to-sql %) " = EXCLUDED." (to-sql %)) fields))
+      (when where
+        (str " WHERE " (format-predicate* where))))))
 
 (defn- format-upsert-clause [upsert]
   (let [ks (keys upsert)]
