@@ -1,9 +1,7 @@
-
 (ns ^{:doc "Extension of the honeysql format functions specifically for postgreSQL"}
     honeysql-postgres.format
-  (:refer-clojure :exclude [format partition-by])
-  (:require [honeysql.format :refer :all]
-            [honeysql-postgres.util :refer [get-first comma-join-args prep-check]]))
+  (:require [honeysql.format :as sqlf :refer [fn-handler format-clause]] ;; multi-methods
+            [honeysql-postgres.util :as util]))
 
 (def ^:private custom-additions
   {:create-table 10
@@ -54,36 +52,36 @@
   "Override the default cluse priority set by honeysql"
   []
   (doseq [[k v] postgres-clause-priorities]
-    (register-clause! k v)))
+    (sqlf/register-clause! k v)))
 
 (defmethod fn-handler "not" [_ value]
-  (str "NOT " (to-sql value)))
+  (str "NOT " (sqlf/to-sql value)))
 
 (defmethod fn-handler "primary-key" [_ & args]
-  (str "PRIMARY KEY" (comma-join-args args)))
+  (str "PRIMARY KEY" (util/comma-join-args args)))
 
 (defmethod fn-handler "unique" [_ & args]
-  (str "UNIQUE" (comma-join-args args)))
+  (str "UNIQUE" (util/comma-join-args args)))
 
 (defmethod fn-handler "foreign-key" [_ & args]
-  (str "FOREIGN KEY" (comma-join-args args)))
+  (str "FOREIGN KEY" (util/comma-join-args args)))
 
 (defmethod fn-handler "references" [_ reftable refcolumn]
-  (str "REFERENCES " (to-sql reftable) (paren-wrap (to-sql refcolumn))))
+  (str "REFERENCES " (sqlf/to-sql reftable) (sqlf/paren-wrap (sqlf/to-sql refcolumn))))
 
 (defmethod fn-handler "constraint" [_ name]
-  (str "CONSTRAINT " (to-sql name)))
+  (str "CONSTRAINT " (sqlf/to-sql name)))
 
 (defmethod fn-handler "default" [_ value]
-  (str "DEFAULT " (to-sql value)))
+  (str "DEFAULT " (sqlf/to-sql value)))
 
 (defmethod fn-handler "nextval" [_ value]
-  (str "nextval('" (to-sql value) "')"))
+  (str "nextval('" (sqlf/to-sql value) "')"))
 
 (defmethod fn-handler "check" [_ & args]
-  (let [preds (format-predicate* (prep-check args))
+  (let [preds (sqlf/format-predicate* (util/prep-check args))
         pred-string (if (= 1 (count args))
-                      (paren-wrap preds)
+                      (sqlf/paren-wrap preds)
                       preds)]
     (str "CHECK" pred-string)))
 
@@ -91,65 +89,65 @@
 
 (defmethod format-clause :on-conflict-constraint [[_ k] _]
   (str "ON CONFLICT ON CONSTRAINT " (-> k
-                                        get-first
-                                        to-sql)))
+                                        util/get-first
+                                        sqlf/to-sql)))
 
 (defmethod format-clause :on-conflict [[_ ids] _]
-  (str "ON CONFLICT " (comma-join-args ids)))
+  (str "ON CONFLICT " (util/comma-join-args ids)))
 
 (defmethod format-clause :do-nothing [_ _]
   "DO NOTHING")
 
 (defmethod format-clause :do-update-set! [[_ values] _]
-  (str "DO UPDATE SET " (comma-join (for [[k v] values]
-                                      (str (to-sql k) " = " (to-sql v))))))
+  (str "DO UPDATE SET " (sqlf/comma-join (for [[k v] values]
+                                           (str (sqlf/to-sql k) " = " (sqlf/to-sql v))))))
 
 (defmethod format-clause :do-update-set [[_ values] _]
   (let [fields (or (:fields values) values)
         where  (:where values)]
     (str "DO UPDATE SET "
-      (comma-join (map #(str (to-sql %) " = EXCLUDED." (to-sql %)) fields))
-      (when where
-        (str " WHERE " (format-predicate* where))))))
+         (sqlf/comma-join (map #(str (sqlf/to-sql %) " = EXCLUDED." (sqlf/to-sql %)) fields))
+         (when where
+           (str " WHERE " (sqlf/format-predicate* where))))))
 
 (defn- format-upsert-clause [upsert]
   (let [ks (keys upsert)]
     (map #(format-clause % (find upsert %)) upsert)))
 
 (defmethod format-clause :upsert [[_ upsert] _]
-  (space-join (format-upsert-clause upsert)))
+  (sqlf/space-join (format-upsert-clause upsert)))
 
 (defmethod format-clause :returning [[_ fields] _]
-  (str "RETURNING " (comma-join (map to-sql fields))))
+  (str "RETURNING " (sqlf/comma-join (map sqlf/to-sql fields))))
 
 (defmethod format-clause :create-view [[_ viewname] _]
   (str "CREATE VIEW " (-> viewname
-                          get-first
-                          to-sql) " AS"))
+                          util/get-first
+                          sqlf/to-sql) " AS"))
 
 (defmethod format-clause :create-table [[_ tablename] _]
   (str "CREATE TABLE " (-> tablename
-                           get-first
-                           to-sql)))
+                           util/get-first
+                           sqlf/to-sql)))
 
 (defmethod format-clause :with-columns [[_ columns] _]
-  (paren-wrap (->> columns
-                   get-first
-                   (map #(space-join (map to-sql %)))
-                   comma-join)))
+  (sqlf/paren-wrap (->> columns
+                        util/get-first
+                        (map #(sqlf/space-join (map sqlf/to-sql %)))
+                        sqlf/comma-join)))
 
 (defmethod format-clause :drop-table [[_ tables] _]
   (str "DROP TABLE " (->> tables
-                          (map to-sql)
-                          comma-join)))
+                          (map sqlf/to-sql)
+                          sqlf/comma-join)))
 
 (defn- format-over-clause [exp]
   (str
-   (-> exp first to-sql)
+   (-> exp first sqlf/to-sql)
    " OVER "
-   (-> exp second to-sql)
+   (-> exp second sqlf/to-sql)
    (when-let [alias (-> exp rest second)]
-     (str " AS " (to-sql alias)))))
+     (str " AS " (sqlf/to-sql alias)))))
 
 (defmethod format-clause :over [[_ fields] complete-sql-map]
   (str
@@ -158,40 +156,40 @@
    (if (seq (:select complete-sql-map)) ", ")
    (->> fields
         (map format-over-clause)
-        comma-join)))
+        sqlf/comma-join)))
 
 (defmethod format-clause :window [[_ [window-name fields]] _]
-  (str "WINDOW " (to-sql window-name) " AS " (to-sql fields)))
+  (str "WINDOW " (sqlf/to-sql window-name) " AS " (sqlf/to-sql fields)))
 
 (defmethod format-clause :partition-by [[_ fields] _]
   (str "PARTITION BY " (->> fields
-                            (map to-sql)
-                            comma-join)))
+                            (map sqlf/to-sql)
+                            sqlf/comma-join)))
 
 (defmethod format-clause :alter-table [[_ tablename] _]
   (str "ALTER TABLE " (-> tablename
-                          get-first
-                          to-sql)))
+                          util/get-first
+                          sqlf/to-sql)))
 
 (defmethod format-clause :add-column [[_ fields] _]
   (str "ADD COLUMN " (->> fields
-                         (map to-sql)
-                         space-join)))
+                          (map sqlf/to-sql)
+                          sqlf/space-join)))
 
 (defmethod format-clause :drop-column [[_ fields] _]
   (str "DROP COLUMN " (->> fields
-                           get-first
-                           to-sql)))
+                           util/get-first
+                           sqlf/to-sql)))
 
 (defmethod format-clause :rename-column [[_ [oldname newname]] _]
-  (str "RENAME COLUMN " (to-sql oldname) " TO " (to-sql newname)))
+  (str "RENAME COLUMN " (sqlf/to-sql oldname) " TO " (sqlf/to-sql newname)))
 
 (defmethod format-clause :rename-table [[_ newname] _]
   (str "RENAME TO " (-> newname
-                        get-first
-                        to-sql)))
+                        util/get-first
+                        sqlf/to-sql)))
 
 (defmethod format-clause :insert-into-as [[_ [table-name table-alias]] _]
-  (str  "INSERT INTO " (to-sql table-name) " AS " (to-sql table-alias)))
+  (str  "INSERT INTO " (sqlf/to-sql table-name) " AS " (sqlf/to-sql table-alias)))
 
 (override-default-clause-priority)

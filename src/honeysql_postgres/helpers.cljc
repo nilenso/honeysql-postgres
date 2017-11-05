@@ -1,6 +1,6 @@
 (ns honeysql-postgres.helpers
-  (:refer-clojure :exclude [update partition-by])
-  (:require [honeysql.helpers :refer :all]))
+  (:refer-clojure :exclude [partition-by])
+  (:require [honeysql.helpers :as sqlh #?(:clj :refer :cljs :refer-macros) [defhelper]]))
 
 ;; Extension of the honeysql helper funcitons for postgreSQL
 
@@ -9,7 +9,7 @@
   (assoc m :do-nothing []))
 
 (defhelper do-update-set [m args]
-  (assoc m :do-update-set (collify args)))
+  (assoc m :do-update-set (sqlh/collify args)))
 
 (defhelper do-update-set! [m args]
   (assoc m :do-update-set! args))
@@ -21,48 +21,48 @@
   (assoc m :on-conflict-constraint args))
 
 (defhelper upsert [m args]
-  (if (plain-map? args)
+  (if (sqlh/plain-map? args)
     (assoc m :upsert args)
     (assoc m :upsert (first args))))
 
 (defhelper returning [m fields]
-  (assoc m :returning (collify fields)))
+  (assoc m :returning (sqlh/collify fields)))
 
 (defhelper create-view [m viewname]
-  (assoc m :create-view (collify viewname)))
+  (assoc m :create-view (sqlh/collify viewname)))
 
 (defhelper create-table [m tablename]
-  (assoc m :create-table (collify tablename)))
+  (assoc m :create-table (sqlh/collify tablename)))
 
 (defhelper with-columns [m args]
   (assoc m :with-columns args))
 
 (defhelper drop-table [m tablenames]
-  (assoc m :drop-table (collify tablenames)))
+  (assoc m :drop-table (sqlh/collify tablenames)))
 
 (defhelper over [m args]
-  (assoc m :over (collify args)))
+  (assoc m :over (sqlh/collify args)))
 
 (defhelper window [m args]
   (assoc m :window args))
 
 (defhelper partition-by [m fields]
-  (assoc m :partition-by (collify fields)))
+  (assoc m :partition-by (sqlh/collify fields)))
 
 (defhelper alter-table [m fields]
-  (assoc m :alter-table (collify fields)))
+  (assoc m :alter-table (sqlh/collify fields)))
 
 (defhelper add-column [m fields]
-  (assoc m :add-column (collify fields)))
+  (assoc m :add-column (sqlh/collify fields)))
 
 (defhelper drop-column [m fields]
-  (assoc m :drop-column (collify fields)))
+  (assoc m :drop-column (sqlh/collify fields)))
 
 (defhelper rename-column [m fields]
   (assoc m :rename-column fields))
 
 (defhelper rename-table [m fields]
-  (assoc m :rename-table (collify fields)))
+  (assoc m :rename-table (sqlh/collify fields)))
 
 (defhelper insert-into-as [m fields]
-  (assoc m :insert-into-as (collify fields)))
+  (assoc m :insert-into-as (sqlh/collify fields)))
