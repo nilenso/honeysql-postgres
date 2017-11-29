@@ -2,7 +2,7 @@
 (ns ^{:doc "Postgres Honeysql utils"}
     honeysql-postgres.util
   (:refer-clojure :exclude [format partition-by])
-  (:require [honeysql.format :refer :all]))
+  (:require [honeysql.format :refer [to-sql comma-join paren-wrap]]))
 
 (defn get-first
   "Returns the first element if the passed argument is a collection, else return the passed argument
