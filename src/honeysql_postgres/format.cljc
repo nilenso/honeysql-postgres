@@ -2,7 +2,7 @@
 (ns ^{:doc "Extension of the honeysql format functions specifically for postgreSQL"}
     honeysql-postgres.format
   (:refer-clojure :exclude [format partition-by])
-  (:require [honeysql.format :refer :all]
+  (:require [honeysql.format :refer [register-clause! fn-handler to-sql paren-wrap format-predicate* format-clause space-join comma-join]]
             [honeysql-postgres.util :refer [get-first comma-join-args prep-check]]))
 
 (def ^:private custom-additions
