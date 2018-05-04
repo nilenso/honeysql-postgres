@@ -125,10 +125,12 @@
                           util/get-first
                           sqlf/to-sql) " AS"))
 
-(defmethod format-clause :create-table [[_ tablename] _]
-  (str "CREATE TABLE " (-> tablename
-                           util/get-first
-                           sqlf/to-sql)))
+(defmethod format-clause :create-table [[_ [tablename if-not-exists]] _]
+  (str "CREATE TABLE "
+       (when if-not-exists "IF NOT EXISTS ")
+       (-> tablename
+           util/get-first
+           sqlf/to-sql)))
 
 (defmethod format-clause :with-columns [[_ columns] _]
   (sqlf/paren-wrap (->> columns
