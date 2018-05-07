@@ -1,14 +1,20 @@
 (ns honeysql-postgres.postgres-test
   (:refer-clojure :exclude [update partition-by])
-  (:require [honeysql-postgres.format :refer :all]
-            [honeysql-postgres.helpers :refer :all]
-            [honeysql.helpers :refer :all]
+  (:require [honeysql-postgres.format :as sqlpf]
+            [honeysql-postgres.helpers :as sqlph :refer [upsert on-conflict do-nothing on-conflict-constraint
+                                                         returning do-update-set do-update-set!
+                                                         alter-table rename-column drop-column
+                                                         add-column partition-by insert-into-as
+                                                         create-table rename-table drop-table
+                                                         window create-view over with-columns]]
+            [honeysql.helpers :as sqlh :refer [insert-into values where select
+                                               from order-by update sset]]
             [honeysql.core :as sql]
-            [clojure.test :refer :all]))
+            [clojure.test :as test :refer [deftest is testing]]))
 
 (deftest upsert-test
   (testing "upsert sql generation for postgresql"
-    (is (= ["INSERT INTO distributors (did, dname) VALUES (5, ?), (6, ?) ON CONFLICT (did) DO UPDATE SET dname = EXCLUDED.dname RETURNING *" "Gizmo Transglobal" "Associated Computing, Inc"]
+    (is (= ["INSERT INTO distributors (did, dname) VALUES (?, ?), (?, ?) ON CONFLICT (did) DO UPDATE SET dname = EXCLUDED.dname RETURNING *" 5 "Gizmo Transglobal" 6 "Associated Computing, Inc"]
            (-> (insert-into :distributors)
                (values [{:did 5 :dname "Gizmo Transglobal"}
                         {:did 6 :dname "Associated Computing, Inc"}])
@@ -16,25 +22,25 @@
                            (do-update-set :dname)))
                (returning :*)
                sql/format)))
-    (is (= ["INSERT INTO distributors (did, dname) VALUES (7, ?) ON CONFLICT (did) DO NOTHING" "Redline GmbH"]
+    (is (= ["INSERT INTO distributors (did, dname) VALUES (?, ?) ON CONFLICT (did) DO NOTHING" 7 "Redline GmbH"]
            (-> (insert-into :distributors)
                (values [{:did 7 :dname "Redline GmbH"}])
                (upsert (-> (on-conflict :did)
                            do-nothing))
                sql/format)))
-    (is (= ["INSERT INTO distributors (did, dname) VALUES (9, ?) ON CONFLICT ON CONSTRAINT distributors_pkey DO NOTHING" "Antwerp Design"]
+    (is (= ["INSERT INTO distributors (did, dname) VALUES (?, ?) ON CONFLICT ON CONSTRAINT distributors_pkey DO NOTHING" 9 "Antwerp Design"]
            (-> (insert-into :distributors)
                (values [{:did 9 :dname "Antwerp Design"}])
                (upsert (-> (on-conflict-constraint :distributors_pkey)
                            do-nothing))
                sql/format)))
-    (is (= ["INSERT INTO distributors (did, dname) VALUES (10, ?), (11, ?) ON CONFLICT (did) DO UPDATE SET dname = EXCLUDED.dname" "Pinp Design" "Foo Bar Works"]
+    (is (= ["INSERT INTO distributors (did, dname) VALUES (?, ?), (?, ?) ON CONFLICT (did) DO UPDATE SET dname = EXCLUDED.dname" 10 "Pinp Design" 11 "Foo Bar Works"]
            (sql/format {:insert-into :distributors
                         :values [{:did 10 :dname "Pinp Design"}
                                  {:did 11 :dname "Foo Bar Works"}]
                         :upsert {:on-conflict [:did]
                                  :do-update-set [:dname]}})))
-    (is (= ["INSERT INTO distributors (did, dname) VALUES (23, ?) ON CONFLICT (did) DO UPDATE SET dname = ?" "Foo Distributors" "EXCLUDED.dname || ' (formerly ' || d.dname || ')'"]
+    (is (= ["INSERT INTO distributors (did, dname) VALUES (?, ?) ON CONFLICT (did) DO UPDATE SET dname = ?" 23 "Foo Distributors" "EXCLUDED.dname || ' (formerly ' || d.dname || ')'"]
            (-> (insert-into :distributors)
                (values [{:did 23 :dname "Foo Distributors"}])
                (on-conflict :did)
@@ -85,7 +91,7 @@
 
 (deftest create-table-test
   (testing "create table with two columns"
-    (is (= ["CREATE TABLE cities (city varchar(80) PRIMARY KEY, location point)"]
+    (is (= ["CREATE TABLE cities (city varchar(?) PRIMARY KEY, location point)" 80]
            (-> (create-table :cities)
                (with-columns [[:city (sql/call :varchar 80) (sql/call :primary-key)]
                               [:location :point]])
@@ -100,7 +106,7 @@
                               [:date :date]])
                sql/format))))
   (testing "creating table with table level constraint"
-    (is (= ["CREATE TABLE films (code char(5), title varchar(40), did integer, date_prod date, kind varchar(10), CONSTRAINT code_title PRIMARY KEY(code, title))"]
+    (is (= ["CREATE TABLE films (code char(?), title varchar(?), did integer, date_prod date, kind varchar(?), CONSTRAINT code_title PRIMARY KEY(code, title))" 5 40 10]
            (-> (create-table :films)
                (with-columns [[:code (sql/call :char 5)]
                               [:title (sql/call :varchar 40)]
@@ -110,7 +116,7 @@
                               [(sql/call :constraint :code_title) (sql/call :primary-key :code :title)]])
                sql/format))))
   (testing "creating table with column level constraint"
-    (is (= ["CREATE TABLE films (code char(5) CONSTRAINT firstkey PRIMARY KEY, title varchar(40) NOT NULL, did integer NOT NULL, date_prod date, kind varchar(10))"]
+    (is (= ["CREATE TABLE films (code char(?) CONSTRAINT firstkey PRIMARY KEY, title varchar(?) NOT NULL, did integer NOT NULL, date_prod date, kind varchar(?))" 5 40 10]
            (-> (create-table :films)
                (with-columns [[:code (sql/call :char 5) (sql/call :constraint :firstkey) (sql/call :primary-key)]
                               [:title (sql/call :varchar 40) (sql/call :not nil)]
@@ -119,13 +125,13 @@
                               [:kind (sql/call :varchar 10)]])
                sql/format))))
   (testing "creating table with columns with default values"
-    (is (= ["CREATE TABLE distributors (did integer PRIMARY KEY DEFAULT nextval('serial'), name varchar(40) NOT NULL)"]
+    (is (= ["CREATE TABLE distributors (did integer PRIMARY KEY DEFAULT nextval('serial'), name varchar(?) NOT NULL)" 40]
            (-> (create-table :distributors)
                (with-columns [[:did :integer (sql/call :primary-key) (sql/call :default (sql/call :nextval :serial))]
                               [:name (sql/call :varchar 40) (sql/call :not nil)]])
                sql/format))))
   (testing "creating table with column checks"
-    (is (= ["CREATE TABLE products (product_no integer, name text, price numeric CHECK(price > 0), discounted_price numeric, CHECK(discounted_price > 0 AND price > discounted_price))"]
+    (is (= ["CREATE TABLE products (product_no integer, name text, price numeric CHECK(price > ?), discounted_price numeric, CHECK(discounted_price > ? AND price > discounted_price))" 0 0]
            (-> (create-table :products)
                (with-columns [[:product_no :integer]
                               [:name :text]
@@ -169,7 +175,7 @@
 
 (deftest insert-into-with-alias
   (testing "insert into with alias"
-    (is (= ["INSERT INTO distributors AS d (did, dname) VALUES (5, ?), (6, ?) ON CONFLICT (did) DO UPDATE SET dname = EXCLUDED.dname WHERE d.zipcode <> ? RETURNING d.*" "Gizmo Transglobal" "Associated Computing, Inc" "21201"]
+    (is (= ["INSERT INTO distributors AS d (did, dname) VALUES (?, ?), (?, ?) ON CONFLICT (did) DO UPDATE SET dname = EXCLUDED.dname WHERE d.zipcode <> ? RETURNING d.*" 5 "Gizmo Transglobal" 6 "Associated Computing, Inc" "21201"]
            (-> (insert-into-as :distributors :d)
                (values [{:did 5 :dname "Gizmo Transglobal"}
                         {:did 6 :dname "Associated Computing, Inc"}])

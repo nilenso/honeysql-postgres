@@ -1,8 +1,7 @@
-
 (ns ^{:doc "Postgres Honeysql utils"}
     honeysql-postgres.util
   (:refer-clojure :exclude [format partition-by])
-  (:require [honeysql.format :refer :all]))
+  (:require [honeysql.format :as sqlf]))
 
 (defn get-first
   "Returns the first element if the passed argument is a collection, else return the passed argument
@@ -18,9 +17,9 @@
   (if (nil? args)
     ""
     (->> args
-         (map to-sql)
-         comma-join
-         paren-wrap)))
+         (map sqlf/to-sql)
+         sqlf/comma-join
+         sqlf/paren-wrap)))
 
 (defn prep-check
   "Adds a logical `:and` operation if args has multiple vectors
