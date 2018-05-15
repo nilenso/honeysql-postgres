@@ -1,0 +1,31 @@
+{
+  "name": "@honeysql/honeysql-postgres",
+  "version": "0.2.3",
+  "license": "EPL-1.0",
+  "homepage": "https://github.com/nilenso/honeysql-postgres",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nilenso/honeysql-postgres"
+  },
+  "contributors": [
+    {
+      "name": "Unnikrishnan",
+      "email": "krish8664@gmail.com",
+      "url": "http://unnikrishnan.in"
+    },
+    {
+      "name": "Andrea Richiardi",
+      "email": "a.richiardi.work@gmail.com",
+      "url": "https://andrearichiardi.com"
+    },
+    {
+      "name": "Igor Bondarenko"
+    }
+  ],
+  "files": [
+    "src/*"
+  ],
+  "directories": {
+    "lib": "src"
+  }
+}
