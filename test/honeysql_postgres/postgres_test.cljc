@@ -184,3 +184,9 @@
                            (where [:<> :d.zipcode "21201"])))
                (returning :d.*)
                sql/format)))))
+
+(deftest create-table-if-not-exists
+  (testing "create a table if not exists"
+    (is (= ["CREATE TABLE IF NOT EXISTS tablename"]
+           (-> (create-table :tablename :if-not-exists)
+               sql/format)))))
