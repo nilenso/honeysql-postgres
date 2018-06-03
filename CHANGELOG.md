@@ -1,3 +1,8 @@
+## 0.2.4
+- Add if-not-exist option to create-table
+- Self-host ClojureScript port
+- Add package.json for npm publishing
+
 ## 0.2.3
 - Allows where clause to be used as an index predicate and update condition during upsert
 

@@ -1,4 +1,4 @@
-(defproject nilenso/honeysql-postgres "0.2.3"
+(defproject nilenso/honeysql-postgres "0.2.4"
   :description "PostgreSQL extension for honeysql"
   :url "https://github.com/nilenso/honeysql-postgres"
   :license {:name "Eclipse Public License"
