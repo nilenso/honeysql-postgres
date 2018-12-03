@@ -190,3 +190,9 @@
     (is (= ["CREATE TABLE IF NOT EXISTS tablename"]
            (-> (create-table :tablename :if-not-exists)
                sql/format)))))
+
+(deftest drop-table-if-exists
+  (testing "drop a table if it exists"
+    (is (= ["DROP TABLE IF EXISTS t1, t2, t3"]
+           (-> (drop-table :if-exists :t1 :t2 :t3)
+               sql/format)))))
