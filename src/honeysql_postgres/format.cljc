@@ -138,10 +138,16 @@
                         (map #(sqlf/space-join (map sqlf/to-sql %)))
                         sqlf/comma-join)))
 
-(defmethod format-clause :drop-table [[_ tables] _]
-  (str "DROP TABLE " (->> tables
-                          (map sqlf/to-sql)
-                          sqlf/comma-join)))
+(defmethod format-clause :drop-table [[_ params] _]
+  (let [[if-exists & others] params
+        tables (if-not (= :if-exists if-exists)
+                 params
+                 others)]
+    (str "DROP TABLE "
+         (when (= :if-exists if-exists) "IF EXISTS ")
+         (->> tables
+              (map sqlf/to-sql)
+              sqlf/comma-join))))
 
 (defn- format-over-clause [exp]
   (str
