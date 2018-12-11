@@ -1,3 +1,6 @@
+## 0.2.5
+- Adds if-exist in drop table
+
 ## 0.2.4
 - Add if-not-exist option to create-table
 - Self-host ClojureScript port

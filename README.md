@@ -44,14 +44,14 @@ Currently honeysql-postgres supports the following postgres specific clauses:
 
 ### Leiningen
 ```clj
-[nilenso/honeysql-postgres "0.2.4"]
+[nilenso/honeysql-postgres "0.2.5"]
 ```
 ### Maven
 ```xml
 <dependency>
   <groupId>nilenso</groupId>
   <artifactId>honeysql-postgres</artifactId>
-  <version>0.2.4</version>
+  <version>0.2.5</version>
 </dependency>
 ```
 ### repl
