@@ -196,3 +196,11 @@
     (is (= ["DROP TABLE IF EXISTS t1, t2, t3"]
            (-> (drop-table :if-exists :t1 :t2 :t3)
                sql/format)))))
+
+(deftest select-where-ilike
+  (testing "select from table with ILIKE operator"
+    (is (= ["SELECT * FROM products WHERE name ILIKE ?" "%name%"])
+        (-> (select :*)
+           (from :products)
+           (where [:ilike :name "%name%"])
+           sql/format))))
