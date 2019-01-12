@@ -199,8 +199,16 @@
 
 (deftest select-where-ilike
   (testing "select from table with ILIKE operator"
-    (is (= ["SELECT * FROM products WHERE name ILIKE ?" "%name%"])
-        (-> (select :*)
-           (from :products)
-           (where [:ilike :name "%name%"])
-           sql/format))))
+    (is (= ["SELECT * FROM products WHERE name ILIKE ?" "%name%"]
+           (-> (select :*)
+              (from :products)
+              (where [:ilike :name "%name%"])
+              sql/format)))))
+
+(deftest select-where-not-ilike
+  (testing "select from table with NOT ILIKE operator"
+    (is (= ["SELECT * FROM products WHERE name NOT ILIKE ?" "%name%"]
+           (-> (select :*)
+              (from :products)
+              (where [:not-ilike :name "%name%"])
+              sql/format)))))

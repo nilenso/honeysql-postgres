@@ -85,9 +85,13 @@
                       preds)]
     (str "CHECK" pred-string)))
 
-(defmethod fmt/fn-handler "ilike" [_ field value]
-  (str (fmt/to-sql field) " ILIKE "
-       (fmt/to-sql value)))
+(defmethod fn-handler "ilike" [_ field value]
+  (str (sqlf/to-sql field) " ILIKE "
+       (sqlf/to-sql value)))
+
+(defmethod fn-handler "not-ilike" [_ field value]
+  (str (sqlf/to-sql field) " NOT ILIKE "
+       (sqlf/to-sql value)))
 
 ;; format-clause multimethods used to format various sql clauses as defined
 
