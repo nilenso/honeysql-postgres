@@ -22,6 +22,7 @@ Currently honeysql-postgres supports the following postgres specific clauses:
   - drop column
   - rename column
 - insert-into-as
+- pattern matching (ILIKE and NOT ILIKE)
 
 ## Index
 
@@ -37,6 +38,7 @@ Currently honeysql-postgres supports the following postgres specific clauses:
   - [create table](https://github.com/nilenso/honeysql-postgres#create-table)
   - [drop table](https://github.com/nilenso/honeysql-postgres#drop-table)
   - [alter table](https://github.com/nilenso/honeysql-postgres#alter-table)
+  - [pattern matching](https://github.com/nilenso/honeysql-postgres#pattern-matching)
   - [SQL functions](https://github.com/nilenso/honeysql-postgres#sql-functions)
 - [License](https://github.com/nilenso/honeysql-postgres#license)
 
@@ -159,6 +161,25 @@ use `alter-table` along with `add-column` & `drop-column` to modify table level 
     (psqlh/drop-column :address)
     sql/format)
 => ["ALTER TABLE employees DROP COLUMN address"]
+```
+
+### pattern matching
+The `ilike` and `not-ilike` operators can be used to query data using a pattern matching technique.
+- like
+```clj
+(-> (select :name)
+    (from :products)
+    (where [:ilike :name "%name%"])
+    sql/format)
+=> ["SELECT * FROM products WHERE name ILIKE ?" "%name%"]
+```
+- not-ilike
+```clj
+(-> (select :name)
+    (from :products)
+    (where [:not-ilike :name "%name%"])
+    sql/format)
+=> ["SELECT * FROM products WHERE name NOT ILIKE ?" "%name%"]
 ```
 
 ### SQL functions
