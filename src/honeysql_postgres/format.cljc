@@ -85,12 +85,20 @@
                       preds)]
     (str "CHECK" pred-string)))
 
+(defmethod fn-handler "ilike" [_ field value]
+  (str (sqlf/to-sql field) " ILIKE "
+       (sqlf/to-sql value)))
+
+(defmethod fn-handler "not-ilike" [_ field value]
+  (str (sqlf/to-sql field) " NOT ILIKE "
+       (sqlf/to-sql value)))
+
 ;; format-clause multimethods used to format various sql clauses as defined
 
 (defmethod format-clause :on-conflict-constraint [[_ k] _]
   (str "ON CONFLICT ON CONSTRAINT " (-> k
-                                        util/get-first
-                                        sqlf/to-sql)))
+                                       util/get-first
+                                       sqlf/to-sql)))
 
 (defmethod format-clause :on-conflict [[_ ids] _]
   (str "ON CONFLICT " (util/comma-join-args ids)))
