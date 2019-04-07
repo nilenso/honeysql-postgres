@@ -45,7 +45,7 @@
           :offset 210
           :lock 215
           :values 220
-          :query-values 250}
+          :query-values 221}
          custom-additions))
 
 (defn override-default-clause-priority

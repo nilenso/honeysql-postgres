@@ -7,8 +7,8 @@
                                                          add-column partition-by insert-into-as
                                                          create-table rename-table drop-table
                                                          window create-view over with-columns]]
-            [honeysql.helpers :as sqlh :refer [insert-into values where select
-                                               from order-by update sset]]
+            [honeysql.helpers :as sqlh :refer [insert-into values where select columns
+                                               from order-by update sset query-values]]
             [honeysql.core :as sql]
             [clojure.test :as test :refer [deftest is testing]]))
 
@@ -45,6 +45,13 @@
                (values [{:did 23 :dname "Foo Distributors"}])
                (on-conflict :did)
                (do-update-set! [:dname "EXCLUDED.dname || ' (formerly ' || d.dname || ')'"])
+               sql/format)))
+    (is (= ["INSERT INTO distributors (did, dname) (SELECT ?, ?) ON CONFLICT ON CONSTRAINT distributors_pkey DO NOTHING" 1 "whatever"]
+           (-> (insert-into :distributors)
+               (columns :did :dname)
+               (query-values (select 1 "whatever"))
+               (upsert (-> (on-conflict-constraint :distributors_pkey)
+                           do-nothing))
                sql/format)))))
 
 
