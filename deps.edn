@@ -1,1 +1,1 @@
-{:deps {honeysql {:mvn/version "0.9.4" :exclusions [org.clojure/clojurescript]}}}
+{:deps {honeysql {:git/url "https://github.com/jkk/honeysql" :sha "be203e9086808c47ab7e42520950db0bfd9efcc1" :exclusions [org.clojure/clojurescript]}}}

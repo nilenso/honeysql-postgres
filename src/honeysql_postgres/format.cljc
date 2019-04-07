@@ -1,6 +1,6 @@
 (ns ^{:doc "Extension of the honeysql format functions specifically for postgreSQL"}
     honeysql-postgres.format
-  (:require [honeysql.format :as sqlf :refer [fn-handler format-clause]] ;; multi-methods
+  (:require [honeysql.format :as sqlf :refer [fn-handler format-clause format-modifiers]] ;; multi-methods
             [honeysql-postgres.util :as util]))
 
 (def ^:private custom-additions
@@ -209,3 +209,6 @@
   (str  "INSERT INTO " (sqlf/to-sql table-name) " AS " (sqlf/to-sql table-alias)))
 
 (override-default-clause-priority)
+
+(defmethod format-modifiers :distinct-on [[_ & fields]]
+  (str "DISTINCT ON(" (sqlf/comma-join (map sqlf/to-sql fields)) ")"))
