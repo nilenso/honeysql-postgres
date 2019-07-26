@@ -10,6 +10,7 @@
             [honeysql.helpers :as sqlh :refer [insert-into values where select columns
                                                from order-by update sset query-values]]
             [honeysql.core :as sql]
+            ; [honeysql.types :refer [array-map]]
             [clojure.test :as test :refer [deftest is testing]]))
 
 (deftest upsert-test
@@ -219,3 +220,11 @@
               (from :products)
               (where [:not-ilike :name "%name%"])
               sql/format)))))
+
+(deftest values-except-select
+  (testing "select rows not present in table"
+    (is (= ["VALUES (4),(5),(6) EXCEPT SELECT id FROM images"]
+           (sql/format
+            {:except
+             [{:values [[4] [5] [6]]}
+              {:select [:id] :from [:images]}]})))))
