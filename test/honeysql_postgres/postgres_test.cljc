@@ -223,8 +223,8 @@
 
 (deftest values-except-select
   (testing "select rows not present in table"
-    (is (= ["VALUES (4),(5),(6) EXCEPT SELECT id FROM images"]
+    (is (= ["VALUES (?), (?), (?) EXCEPT SELECT id FROM images" 4 5 6]
            (sql/format
-            {:except
-             [{:values [[4] [5] [6]]}
-              {:select [:id] :from [:images]}]})))))
+                  {:except
+                   [{:values [[4] [5] [6]]}
+                    {:select [:id] :from [:images]}]})))))
