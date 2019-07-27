@@ -222,9 +222,36 @@
               sql/format)))))
 
 (deftest values-except-select
-  (testing "select rows not present in table"
+  (testing "select which values are not not present in a table"
     (is (= ["VALUES (?), (?), (?) EXCEPT SELECT id FROM images" 4 5 6]
            (sql/format
                   {:except
                    [{:values [[4] [5] [6]]}
                     {:select [:id] :from [:images]}]})))))
+
+
+(deftest select-except-select
+  (testing "select which rows are not present in another table"
+    (is (= ["SELECT ip EXCEPT SELECT ip FROM ip_location"]
+           (sql/format
+            {:except
+             [{:select [:ip]}
+              {:select [:ip] :from [:ip_location]}]})))))
+
+
+(deftest values-except-all-select
+  (testing "select which values are not not present in a table"
+    (is (= ["VALUES (?), (?), (?) EXCEPT ALL SELECT id FROM images" 4 5 6]
+           (sql/format
+            {:except-all
+             [{:values [[4] [5] [6]]}
+              {:select [:id] :from [:images]}]})))))
+
+
+(deftest select-except-all-select
+  (testing "select which rows are not present in another table"
+    (is (= ["SELECT ip EXCEPT ALL SELECT ip FROM ip_location"]
+           (sql/format
+            {:except-all
+             [{:select [:ip]}
+              {:select [:ip] :from [:ip_location]}]})))))
