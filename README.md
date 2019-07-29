@@ -23,6 +23,7 @@ Currently honeysql-postgres supports the following postgres specific clauses:
   - rename column
 - insert-into-as
 - pattern matching (ILIKE and NOT ILIKE)
+- except (and except-all)
 
 ## Index
 
@@ -39,6 +40,7 @@ Currently honeysql-postgres supports the following postgres specific clauses:
   - [drop table](https://github.com/nilenso/honeysql-postgres#drop-table)
   - [alter table](https://github.com/nilenso/honeysql-postgres#alter-table)
   - [pattern matching](https://github.com/nilenso/honeysql-postgres#pattern-matching)
+  - [except](#except)
   - [SQL functions](https://github.com/nilenso/honeysql-postgres#sql-functions)
 - [License](https://github.com/nilenso/honeysql-postgres#license)
 
@@ -181,6 +183,17 @@ The `ilike` and `not-ilike` operators can be used to query data using a pattern 
     sql/format)
 => ["SELECT * FROM products WHERE name NOT ILIKE ?" "%name%"]
 ```
+### except
+
+```clj
+
+(sql/format
+  {:except
+    [{:select [:ip]}
+     {:select [:ip] :from [:ip_location]}]})
+=> ["SELECT ip EXCEPT SELECT ip FROM ip_location"]
+```
+`except-all` works the same way as `except`.
 
 ### SQL functions
 The following are the SQL functions added in `honeysql-postgres`
