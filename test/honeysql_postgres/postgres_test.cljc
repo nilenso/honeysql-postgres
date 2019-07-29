@@ -10,7 +10,6 @@
             [honeysql.helpers :as sqlh :refer [insert-into values where select columns
                                                from order-by update sset query-values]]
             [honeysql.core :as sql]
-            ; [honeysql.types :refer [array-map]]
             [clojure.test :as test :refer [deftest is testing]]))
 
 (deftest upsert-test
