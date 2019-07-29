@@ -27,22 +27,22 @@ Currently honeysql-postgres supports the following postgres specific clauses:
 
 ## Index
 
-- [Usage](https://github.com/nilenso/honeysql-postgres#usage)
-  - [Leiningen](https://github.com/nilenso/honeysql-postgres#leiningen)
-  - [Maven](https://github.com/nilenso/honeysql-postgres#maven)
-  - [repl](https://github.com/nilenso/honeysql-postgres#repl)
-  - [Breaking Change](https://github.com/nilenso/honeysql-postgres#breaking-change)
-  - [upsert](https://github.com/nilenso/honeysql-postgres#upsert)
-  - [insert into with alias](https://github.com/nilenso/honeysql-postgres#insert-into-with-alias)
-  - [over](https://github.com/nilenso/honeysql-postgres#over)
-  - [create view](https://github.com/nilenso/honeysql-postgres#create-view)
-  - [create table](https://github.com/nilenso/honeysql-postgres#create-table)
-  - [drop table](https://github.com/nilenso/honeysql-postgres#drop-table)
-  - [alter table](https://github.com/nilenso/honeysql-postgres#alter-table)
-  - [pattern matching](https://github.com/nilenso/honeysql-postgres#pattern-matching)
+- [Usage](#usage)
+  - [Leiningen](#leiningen)
+  - [Maven](#maven)
+  - [repl](#repl)
+  - [Breaking Change](#breaking-change)
+  - [upsert](#upsert)
+  - [insert into with alias](#insert-into-with-alias)
+  - [over](#over)
+  - [create view](#create-view)
+  - [create table](#create-table)
+  - [drop table](#drop-table)
+  - [alter table](#alter-table)
+  - [pattern matching](#pattern-matching)
   - [except](#except)
-  - [SQL functions](https://github.com/nilenso/honeysql-postgres#sql-functions)
-- [License](https://github.com/nilenso/honeysql-postgres#license)
+  - [SQL functions](#sql-functions)
+- [License](#license)
 
 ## Usage
 
