@@ -28,6 +28,7 @@
   (merge {:with 30
           :with-recursive 40
           :except 45
+          :except-all 45
           :select 50
           :insert-into 60
           :update 70
@@ -213,5 +214,9 @@
 (defmethod format-clause :except [[_ maps] _]
   (binding [sqlf/*subquery?* false]
     (string/join " EXCEPT " (map sqlf/to-sql maps))))
+
+(defmethod format-clause :except-all [[_ maps] _]
+  (binding [sqlf/*subquery?* false]
+    (string/join " EXCEPT ALL " (map sqlf/to-sql maps))))
 
 (override-default-clause-priority)
