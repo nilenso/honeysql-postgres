@@ -48,19 +48,19 @@ Currently honeysql-postgres supports the following postgres specific clauses:
 
 ### Leiningen
 ```clj
-[nilenso/honeysql-postgres "0.2.5"]
+[nilenso/honeysql-postgres "0.2.6"]
 ```
 ### Maven
 ```xml
 <dependency>
   <groupId>nilenso</groupId>
   <artifactId>honeysql-postgres</artifactId>
-  <version>0.2.5</version>
+  <version>0.2.6</version>
 </dependency>
 ```
 ### repl
 ```clj
-; Note that `honeysql-postgres.format` and `honeysql-postgres.helpers` 
+; Note that `honeysql-postgres.format` and `honeysql-postgres.helpers`
 ; must be required into the project for the extended features to work.
 (require '[honeysql.core :as sql]
          '[honeysql.helpers :refer :all]

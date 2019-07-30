@@ -1,3 +1,8 @@
+## 0.2.6
+- Add ILIKE, NOT ILIKE
+- ADD EXCEPT and EXCEPT ALL
+- Fix query-values priority
+
 ## 0.2.5
 - Adds if-exist in drop table
 
