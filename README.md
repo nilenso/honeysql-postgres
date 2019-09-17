@@ -23,42 +23,44 @@ Currently honeysql-postgres supports the following postgres specific clauses:
   - rename column
 - insert-into-as
 - pattern matching (ILIKE and NOT ILIKE)
+- except (and except-all)
 
 ## Index
 
-- [Usage](https://github.com/nilenso/honeysql-postgres#usage)
-  - [Leiningen](https://github.com/nilenso/honeysql-postgres#leiningen)
-  - [Maven](https://github.com/nilenso/honeysql-postgres#maven)
-  - [repl](https://github.com/nilenso/honeysql-postgres#repl)
-  - [Breaking Change](https://github.com/nilenso/honeysql-postgres#breaking-change)
-  - [upsert](https://github.com/nilenso/honeysql-postgres#upsert)
-  - [insert into with alias](https://github.com/nilenso/honeysql-postgres#insert-into-with-alias)
-  - [over](https://github.com/nilenso/honeysql-postgres#over)
-  - [create view](https://github.com/nilenso/honeysql-postgres#create-view)
-  - [create table](https://github.com/nilenso/honeysql-postgres#create-table)
-  - [drop table](https://github.com/nilenso/honeysql-postgres#drop-table)
-  - [alter table](https://github.com/nilenso/honeysql-postgres#alter-table)
-  - [pattern matching](https://github.com/nilenso/honeysql-postgres#pattern-matching)
-  - [SQL functions](https://github.com/nilenso/honeysql-postgres#sql-functions)
-- [License](https://github.com/nilenso/honeysql-postgres#license)
+- [Usage](#usage)
+  - [Leiningen](#leiningen)
+  - [Maven](#maven)
+  - [repl](#repl)
+  - [Breaking Change](#breaking-change)
+  - [upsert](#upsert)
+  - [insert into with alias](#insert-into-with-alias)
+  - [over](#over)
+  - [create view](#create-view)
+  - [create table](#create-table)
+  - [drop table](#drop-table)
+  - [alter table](#alter-table)
+  - [pattern matching](#pattern-matching)
+  - [except](#except)
+  - [SQL functions](#sql-functions)
+- [License](#license)
 
 ## Usage
 
 ### Leiningen
 ```clj
-[nilenso/honeysql-postgres "0.2.5"]
+[nilenso/honeysql-postgres "0.2.6"]
 ```
 ### Maven
 ```xml
 <dependency>
   <groupId>nilenso</groupId>
   <artifactId>honeysql-postgres</artifactId>
-  <version>0.2.5</version>
+  <version>0.2.6</version>
 </dependency>
 ```
 ### repl
 ```clj
-; Note that `honeysql-postgres.format` and `honeysql-postgres.helpers` 
+; Note that `honeysql-postgres.format` and `honeysql-postgres.helpers`
 ; must be required into the project for the extended features to work.
 (require '[honeysql.core :as sql]
          '[honeysql.helpers :refer :all]
@@ -181,6 +183,17 @@ The `ilike` and `not-ilike` operators can be used to query data using a pattern 
     sql/format)
 => ["SELECT * FROM products WHERE name NOT ILIKE ?" "%name%"]
 ```
+### except
+
+```clj
+
+(sql/format
+  {:except
+    [{:select [:ip]}
+     {:select [:ip] :from [:ip_location]}]})
+=> ["SELECT ip EXCEPT SELECT ip FROM ip_location"]
+```
+`except-all` works the same way as `except`.
 
 ### SQL functions
 The following are the SQL functions added in `honeysql-postgres`

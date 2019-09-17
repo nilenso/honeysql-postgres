@@ -1,7 +1,8 @@
 (ns ^{:doc "Extension of the honeysql format functions specifically for postgreSQL"}
     honeysql-postgres.format
   (:require [honeysql.format :as sqlf :refer [fn-handler format-clause format-modifiers]] ;; multi-methods
-            [honeysql-postgres.util :as util]))
+            [honeysql-postgres.util :as util]
+            [clojure.string :as string]))
 
 (def ^:private custom-additions
   {:create-table 10
@@ -26,6 +27,8 @@
   "Determines the order that clauses will be placed within generated SQL"
   (merge {:with 30
           :with-recursive 40
+          :except 45
+          :except-all 45
           :select 50
           :insert-into 60
           :update 70
@@ -207,6 +210,14 @@
 
 (defmethod format-clause :insert-into-as [[_ [table-name table-alias]] _]
   (str  "INSERT INTO " (sqlf/to-sql table-name) " AS " (sqlf/to-sql table-alias)))
+
+(defmethod format-clause :except [[_ maps] _]
+  (binding [sqlf/*subquery?* false]
+    (string/join " EXCEPT " (map sqlf/to-sql maps))))
+
+(defmethod format-clause :except-all [[_ maps] _]
+  (binding [sqlf/*subquery?* false]
+    (string/join " EXCEPT ALL " (map sqlf/to-sql maps))))
 
 (override-default-clause-priority)
 
