@@ -88,15 +88,6 @@ The query creation and usage is exactly the same as honeysql.
 (-> (insert-into :distributors)
     (values [{:did 23 :dname "Foo Distributors"}])
     (psqlh/on-conflict :did)
-    (psqlh/do-update-set! [:dname "EXCLUDED.dname || ' (formerly ' || distributors.dname || ')'"])
-    sql/format)
-=> ["INSERT INTO distributors (did, dname) VALUES (23, ?) ON CONFLICT (did) DO UPDATE SET dname = ?" "Foo Distributors" "EXCLUDED.dname || ' (formerly ' || d.dname || ')'"]
-```
-To set multiple fields on conflict, add the `[k, v]` statements like this:
-```clj
-(-> (insert-into :distributors)
-    (values [{:did 23 :dname "Foo Distributors"}])
-    (psqlh/on-conflict :did)
     (psqlh/do-update-set! [:dname "EXCLUDED.dname || ' (formerly ' || distributors.dname || ')'"] [:downer "EXCLUDED.downer"])
     sql/format)
 => ["INSERT INTO distributors (did, dname) VALUES (23, ?) ON CONFLICT (did) DO UPDATE SET dname = ?, downer = ?" "Foo Distributors" "EXCLUDED.dname || ' (formerly ' || d.dname || ')'" "EXCLUDED.downer"]
