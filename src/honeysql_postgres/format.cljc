@@ -1,6 +1,6 @@
 (ns ^{:doc "Extension of the honeysql format functions specifically for postgreSQL"}
     honeysql-postgres.format
-  (:require [honeysql.format :as sqlf :refer [fn-handler format-clause]] ;; multi-methods
+  (:require [honeysql.format :as sqlf :refer [fn-handler format-clause format-modifiers]] ;; multi-methods
             [honeysql-postgres.util :as util]
             [clojure.string :as string]))
 
@@ -220,3 +220,6 @@
     (string/join " EXCEPT ALL " (map sqlf/to-sql maps))))
 
 (override-default-clause-priority)
+
+(defmethod format-modifiers :distinct-on [[_ & fields]]
+  (str "DISTINCT ON(" (sqlf/comma-join (map sqlf/to-sql fields)) ")"))

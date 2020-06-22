@@ -8,7 +8,8 @@
                                                          create-table rename-table drop-table
                                                          window create-view over with-columns]]
             [honeysql.helpers :as sqlh :refer [insert-into values where select columns
-                                               from order-by update sset query-values]]
+                                               from order-by update sset query-values
+                                               modifiers]]
             [honeysql.core :as sql]
             [clojure.test :as test :refer [deftest is testing]]))
 
@@ -254,3 +255,11 @@
             {:except-all
              [{:select [:ip]}
               {:select [:ip] :from [:ip_location]}]})))))
+
+(deftest select-distinct-on
+  (testing "select distinct on"
+    (is (= ["SELECT DISTINCT ON(\"a\", \"b\") \"c\" FROM \"products\" "]
+           (-> (select :c)
+              (from :products)
+              (modifiers :distinct-on :a :b)
+              (sql/format :quoting :ansi))))))
