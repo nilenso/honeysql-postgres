@@ -11,7 +11,7 @@ This library aims to extend the features of honeysql to support postgres specifi
 - [Usage](#usage)
   - [Leiningen](#leiningen)
   - [Maven](#maven)
-  - [repl](#repl)
+  - [REPL](#REPL)
   - [Breaking Change](#breaking-change)
   - [upsert](#upsert)
   - [insert into with alias](#insert-into-with-alias)
@@ -39,7 +39,7 @@ This library aims to extend the features of honeysql to support postgres specifi
   <version>0.2.6</version>
 </dependency>
 ```
-### repl
+### REPL
 ```clj
 ; Note that `honeysql-postgres.format` and `honeysql-postgres.helpers`
 ; must be required into the project for the extended features to work.
