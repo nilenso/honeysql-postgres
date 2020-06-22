@@ -1,8 +1,8 @@
 (ns ^{:doc "Extension of the honeysql format functions specifically for postgreSQL"}
     honeysql-postgres.format
-  (:require [honeysql.format :as sqlf :refer [fn-handler format-clause format-modifiers]] ;; multi-methods
+  (:require [clojure.string :as string]
             [honeysql-postgres.util :as util]
-            [clojure.string :as string]))
+            [honeysql.format :as sqlf :refer [fn-handler format-clause format-modifiers]]))
 
 (def ^:private custom-additions
   {:create-table 10
@@ -30,6 +30,7 @@
           :except 45
           :except-all 45
           :select 50
+          :filter 55
           :insert-into 60
           :update 70
           :delete-from 80
@@ -112,6 +113,15 @@
 (defmethod format-clause :do-update-set! [[_ values] _]
   (str "DO UPDATE SET " (sqlf/comma-join (for [[k v] values]
                                            (str (sqlf/to-sql k) " = " (sqlf/to-sql v))))))
+
+(defmethod format-clause :filter [[_ fields] sql-map]
+  (let [filter-clause (fn [coll]
+                        (let [[clause subclause alias] (vec (map sqlf/to-sql coll))]
+                          (str clause " FLITER " subclause (when alias (str " AS " alias)))))]
+    (str (if (seq (:select sql-map)) ", ")
+         (->> fields
+              (map filter-clause)
+              sqlf/comma-join))))
 
 (defmethod format-clause :do-update-set [[_ values] _]
   (let [fields (or (:fields values) values)

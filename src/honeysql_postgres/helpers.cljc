@@ -11,6 +11,9 @@
 (defhelper do-update-set [m args]
   (assoc m :do-update-set (sqlh/collify args)))
 
+(defhelper filter [m args]
+  (assoc m :filter (sqlh/collify args)))
+
 (defhelper do-update-set! [m args]
   (assoc m :do-update-set! args))
 

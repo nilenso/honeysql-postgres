@@ -1,15 +1,46 @@
 (ns honeysql-postgres.postgres-test
   (:refer-clojure :exclude [update partition-by])
   (:require [honeysql-postgres.format :as sqlpf]
-            [honeysql-postgres.helpers :as sqlph :refer [upsert on-conflict do-nothing on-conflict-constraint
-                                                         returning do-update-set do-update-set!
-                                                         alter-table rename-column drop-column
-                                                         add-column partition-by insert-into-as
-                                                         create-table rename-table drop-table
-                                                         window create-view over with-columns]]
-            [honeysql.helpers :as sqlh :refer [insert-into values where select columns
-                                               from order-by update sset query-values
-                                               modifiers]]
+            [honeysql-postgres.helpers
+             :as
+             sqlph
+             :refer
+             [upsert
+              on-conflict
+              do-nothing
+              on-conflict-constraint
+              returning
+              do-update-set
+              do-update-set!
+              alter-table
+              rename-column
+              drop-column
+              add-column
+              partition-by
+              insert-into-as
+              create-table
+              rename-table
+              drop-table
+              window
+              create-view
+              over
+              with-columns
+              filter]]
+            [honeysql.helpers
+             :as
+             sqlh
+             :refer
+             [insert-into
+              values
+              where
+              select
+              columns
+              from
+              order-by
+              update
+              sset
+              query-values
+              modifiers]]
             [honeysql.core :as sql]
             [clojure.test :as test :refer [deftest is testing]]))
 
@@ -65,6 +96,18 @@
                           :where         [:<> :phone nil]
                           :do-update-set {:fields [:phone :name]
                                           :where  [:= :user.active false]}}}))))
+
+(deftest filter-test
+  (is (= (filter (where [:not [:between :i 3 5]]) :an-alias)
+         {:where [:not [:between :i 3 5]]
+          :filter '(:an-alias)}))
+
+  (is (= ["SELECT count(*) , count(*) FLITER (WHERE i < ?) AS foo, count(*) FLITER (WHERE i BETWEEN ? AND ?) AS bar FROM generate_series(1,10) AS s(i)" 5 3 10]
+         (-> (select (sql/call :count :*))
+             (filter [(sql/call :count :*) (where [:< :i 5]) :foo]
+                     [(sql/call :count :*) (where [:between :i 3 10]) :bar])
+             (from (sql/raw "generate_series(1,10) AS s(i)"))
+             sql/format))))
 
 
 (deftest returning-test
