@@ -1,29 +1,10 @@
 # honeysql-postgres
 [![Clojars Project](https://img.shields.io/clojars/v/nilenso/honeysql-postgres.svg)](https://clojars.org/nilenso/honeysql-postgres) [![NPM Version](https://img.shields.io/npm/v/@honeysql/honeysql-postgres.svg)](https://www.npmjs.org/package/@honeysql/honeysql-postgres)
 
-PostgreSQL extensions for widely used [honeysql](https://github.com/jkk/honeysql). This library extends the features of honeysql to support postgres specific SQL clauses and some basic SQL DDL in addition to the ones supported by the parent library. This library exists because it felt having a separate vendor specific namespace rather over having everything within honeysql.
+PostgreSQL extensions for the widely used [honeysql](https://github.com/jkk/honeysql). 
 
-Currently honeysql-postgres supports the following postgres specific clauses:
+This library aims to extend the features of honeysql to support postgres specific SQL clauses and some basic SQL DDL in addition to the ones supported by the parent library. This keeps honeysql clean and single-purpose, any vendor-specific additions can simply be separate libraries that work on top.
 
-- upsert
-  - on conflict
-  - on conflict on constraint
-  - do update set
-  - do nothing
-- returning
-- partition by
-- over
-- window
-- create view
-- create table
-- drop table
-- alter table
-  - add column
-  - drop column
-  - rename column
-- insert-into-as
-- pattern matching (ILIKE and NOT ILIKE)
-- except (and except-all)
 
 ## Index
 
@@ -256,6 +237,6 @@ The following are the SQL functions added in `honeysql-postgres`
 ```
 ## License
 
-Copyright © 2016 Nilenso
+Copyright © 2020 Nilenso
 
 Distributed under the Eclipse Public License, the same as Clojure.
