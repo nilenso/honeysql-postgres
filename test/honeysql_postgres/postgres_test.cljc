@@ -98,9 +98,9 @@
                                           :where  [:= :user.active false]}}}))))
 
 (deftest filter-test
-  (is (= (filter (where [:not [:between :i 3 5]]) :an-alias)
-         {:where [:not [:between :i 3 5]]
-          :filter '(:an-alias)}))
+  (is (= {:where  [:not [:between :i 3 5]]
+          :filter [:an-alias]}
+         (filter (where [:not [:between :i 3 5]]) :an-alias)))
 
   (is (= ["SELECT count(*) , count(*) FLITER (WHERE i < ?) AS foo, count(*) FLITER (WHERE i BETWEEN ? AND ?) AS bar FROM generate_series(1,10) AS s(i)" 5 3 10]
          (-> (select (sql/call :count :*))

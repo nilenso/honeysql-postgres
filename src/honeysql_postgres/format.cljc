@@ -115,12 +115,12 @@
                                            (str (sqlf/to-sql k) " = " (sqlf/to-sql v))))))
 
 (defmethod format-clause :filter [[_ fields] sql-map]
-  (let [filter-clause (fn [coll]
-                        (let [[clause subclause alias] (vec (map sqlf/to-sql coll))]
-                          (str clause " FLITER " subclause (when alias (str " AS " alias)))))]
+  (let [format-filter-clause (fn [coll]
+                               (let [[clause subclause alias] (vec (map sqlf/to-sql coll))]
+                                 (str clause " FLITER " subclause (when alias (str " AS " alias)))))]
     (str (if (seq (:select sql-map)) ", ")
          (->> fields
-              (map filter-clause)
+              (map format-filter-clause)
               sqlf/comma-join))))
 
 (defmethod format-clause :do-update-set [[_ values] _]
