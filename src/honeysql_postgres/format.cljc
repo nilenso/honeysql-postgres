@@ -117,11 +117,11 @@
 (defmethod format-clause :filter [[_ fields] sql-map]
   (let [format-filter-clause (fn [coll]
                                (let [[clause subclause alias] (vec (map sqlf/to-sql coll))]
-                                 (str clause " FLITER " subclause (when alias (str " AS " alias)))))]
+                                 (str clause " FILTER " subclause (when alias (str " AS " alias)))))]
     (str (if (seq (:select sql-map)) ", ")
          (->> fields
               (map format-filter-clause)
-              sqlf/comma-join))))
+              (sqlf/comma-join)))))
 
 (defmethod format-clause :do-update-set [[_ values] _]
   (let [fields (or (:fields values) values)

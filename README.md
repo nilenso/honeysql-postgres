@@ -1,10 +1,14 @@
 # honeysql-postgres
 [![Clojars Project](https://img.shields.io/clojars/v/nilenso/honeysql-postgres.svg)](https://clojars.org/nilenso/honeysql-postgres) [![NPM Version](https://img.shields.io/npm/v/@honeysql/honeysql-postgres.svg)](https://www.npmjs.org/package/@honeysql/honeysql-postgres)
 
-PostgreSQL extensions for the widely used [honeysql](https://github.com/jkk/honeysql). 
+PostgreSQL extensions for the widely used [honeysql](https://github.com/jkk/honeysql).
 
 This library aims to extend the features of honeysql to support postgres specific SQL clauses and some basic SQL DDL in addition to the ones supported by the parent library. This keeps honeysql clean and single-purpose, any vendor-specific additions can simply be separate libraries that work on top.
 
+## Breaking Change
+Implementation of `over` has been changed (from 0.2.2) to accept alias as an option and define the aggregator-function within the over clause and not in the select clause, this allows the inclusion of multiple window-function which was not possible in the previous implementation.
+
+The query creation and usage is exactly the same as honeysql.
 
 ## Index
 
@@ -12,7 +16,6 @@ This library aims to extend the features of honeysql to support postgres specifi
   - [Leiningen](#leiningen)
   - [Maven](#maven)
   - [REPL](#REPL)
-  - [Breaking Change](#breaking-change)
   - [upsert](#upsert)
   - [insert into with alias](#insert-into-with-alias)
   - [over](#over)
@@ -48,11 +51,6 @@ This library aims to extend the features of honeysql to support postgres specifi
          '[honeysql-postgres.format :refer :all]
          '[honeysql-postgres.helpers :as psqlh])
 ```
-
-### Breaking Change
-Implementation of `over` has been changed (from 0.2.2) to accept alias as an option and define the aggregator-function within the over clause and not in the select clause, this allows the inclusion of multiple window-function which was not possible in the previous implementation.
-
-The query creation and usage is exactly the same as honeysql.
 
 ### upsert
 `upsert` can be written either way. You can make use of `do-update-set!` over `do-update-set`, if you want to modify the some column values in case of conflicts.
@@ -164,6 +162,7 @@ The `ilike` and `not-ilike` operators can be used to query data using a pattern 
     sql/format)
 => ["SELECT * FROM products WHERE name NOT ILIKE ?" "%name%"]
 ```
+
 ### except
 
 ```clj
@@ -175,6 +174,17 @@ The `ilike` and `not-ilike` operators can be used to query data using a pattern 
 => ["SELECT ip EXCEPT SELECT ip FROM ip_location"]
 ```
 `except-all` works the same way as `except`.
+
+### filter
+
+``` clj
+(-> (select (sql/call :count :*))
+    (filter [(sql/call :count :*) (where [:< :i 5]) :foo]
+    [(sql/call :count :*) (where [:between :i 3 10]) :bar])
+    (from (sql/raw "generate_series(1,10) AS s(i)"))
+    (sql/format))
+=> ["SELECT count(*) , count(*) FILTER (WHERE i < ?) AS foo, count(*) FILTER (WHERE i BETWEEN ? AND ?) AS bar FROM generate_series(1,10) AS s(i)" 5 3 10]
+```
 
 ### SQL functions
 The following are the SQL functions added in `honeysql-postgres`
@@ -235,6 +245,7 @@ The following are the SQL functions added in `honeysql-postgres`
 (sql/format (sql/call :check [:= :a :b] [:= :c :d]))
 ["CHECK(a = b AND c = d)"]
 ```
+
 ## License
 
 Copyright © 2020 Nilenso

@@ -102,12 +102,12 @@
           :filter [:an-alias]}
          (filter (where [:not [:between :i 3 5]]) :an-alias)))
 
-  (is (= ["SELECT count(*) , count(*) FLITER (WHERE i < ?) AS foo, count(*) FLITER (WHERE i BETWEEN ? AND ?) AS bar FROM generate_series(1,10) AS s(i)" 5 3 10]
+  (is (= ["SELECT count(*) , count(*) FILTER (WHERE i < ?) AS foo, count(*) FILTER (WHERE i BETWEEN ? AND ?) AS bar FROM generate_series(1,10) AS s(i)" 5 3 10]
          (-> (select (sql/call :count :*))
              (filter [(sql/call :count :*) (where [:< :i 5]) :foo]
                      [(sql/call :count :*) (where [:between :i 3 10]) :bar])
              (from (sql/raw "generate_series(1,10) AS s(i)"))
-             sql/format))))
+             (sql/format)))))
 
 
 (deftest returning-test
