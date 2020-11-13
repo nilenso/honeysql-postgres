@@ -89,12 +89,12 @@
 (deftest upsert-where-test
   (is (= ["INSERT INTO user (phone, name) VALUES (?, ?) ON CONFLICT (phone) WHERE phone IS NOT NULL DO UPDATE SET phone = EXCLUDED.phone, name = EXCLUDED.name WHERE user.active = FALSE" "5555555" "John"]
          (sql/format
-           {:insert-into :user
-            :values      [{:phone "5555555" :name "John"}]
-            :upsert      {:on-conflict   [:phone]
-                          :where         [:<> :phone nil]
-                          :do-update-set {:fields [:phone :name]
-                                          :where  [:= :user.active false]}}}))))
+          {:insert-into :user
+           :values      [{:phone "5555555" :name "John"}]
+           :upsert      {:on-conflict   [:phone]
+                         :where         [:<> :phone nil]
+                         :do-update-set {:fields [:phone :name]
+                                         :where  [:= :user.active false]}}}))))
 
 (deftest filter-test
   (is (= ["count(*) FILTER (WHERE NOT i BETWEEN ? AND ?) AS a" 3 5]

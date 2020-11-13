@@ -2,8 +2,7 @@
  honeysql-postgres.format
   (:require [clojure.string :as string]
             [honeysql.format :as sqlf :refer [fn-handler format-clause format-modifiers]] ;; multi-methods
-            [honeysql-postgres.util :as util]
-            [honeysql.format :as sqlf :refer [fn-handler format-clause format-modifiers]]))
+            [honeysql-postgres.util :as util]))
 
 (def ^:private custom-additions
   {:create-table 10
