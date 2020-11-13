@@ -98,14 +98,13 @@
                                           :where  [:= :user.active false]}}}))))
 
 (deftest filter-test
-  (is (= {:where  [:not [:between :i 3 5]]
-          :filter [:an-alias]}
-         (filter (where [:not [:between :i 3 5]]) :an-alias)))
+  (is (= ["count(*) FILTER (WHERE NOT i BETWEEN ? AND ?) AS a" 3 5]
+         (sql/format (filter [(sql/call :count :*)(where [:not [:between :i 3 5]]) :a]))))
 
-  (is (= ["SELECT count(*) , count(*) FILTER (WHERE i < ?) AS foo, count(*) FILTER (WHERE i BETWEEN ? AND ?) AS bar FROM generate_series(1,10) AS s(i)" 5 3 10]
+  (is (= ["SELECT count(*) , count(*) FILTER (WHERE s.i < ?) AS foo, count(*) FILTER (WHERE s.i BETWEEN ? AND ?) AS bar FROM generate_series(1,10) AS s(i)" 5 3 10]
          (-> (select (sql/call :count :*))
-             (filter [(sql/call :count :*) (where [:< :i 5]) :foo]
-                     [(sql/call :count :*) (where [:between :i 3 10]) :bar])
+             (filter [(sql/call :count :*) (where [:< :s.i 5]) :foo]
+                     [(sql/call :count :*) (where [:between :s.i 3 10]) :bar])
              (from (sql/raw "generate_series(1,10) AS s(i)"))
              (sql/format)))))
 

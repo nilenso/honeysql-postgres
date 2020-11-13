@@ -180,7 +180,7 @@ The `ilike` and `not-ilike` operators can be used to query data using a pattern 
 ``` clj
 (-> (select (sql/call :count :*))
     (filter [(sql/call :count :*) (where [:< :i 5]) :foo]
-    [(sql/call :count :*) (where [:between :i 3 10]) :bar])
+            [(sql/call :count :*) (where [:between :i 3 10]) :bar])
     (from (sql/raw "generate_series(1,10) AS s(i)"))
     (sql/format))
 => ["SELECT count(*) , count(*) FILTER (WHERE i < ?) AS foo, count(*) FILTER (WHERE i BETWEEN ? AND ?) AS bar FROM generate_series(1,10) AS s(i)" 5 3 10]

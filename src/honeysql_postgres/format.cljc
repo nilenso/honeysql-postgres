@@ -11,8 +11,9 @@
    :add-column 30
    :drop-column 40
    :create-view 40
-   :insert-into-as 60
+   :filter 54
    :over 55
+   :insert-into-as 60
    :partition-by 165
    :window 195
    :upsert 225
@@ -30,7 +31,6 @@
           :except 45
           :except-all 45
           :select 50
-          :filter 55
           :insert-into 60
           :update 70
           :delete-from 80
@@ -114,12 +114,12 @@
   (str "DO UPDATE SET " (sqlf/comma-join (for [[k v] values]
                                            (str (sqlf/to-sql k) " = " (sqlf/to-sql v))))))
 
-(defmethod format-clause :filter [[_ fields] sql-map]
-  (let [format (fn [coll]
-                 (let [[clause subclause alias] (mapv sqlf/to-sql coll)]
-                   (str clause " FILTER " subclause (when alias (str " AS " alias)))))]
+(defmethod format-clause :filter [[_ expr] sql-map]
+  (let [format (fn [expr]
+                 (let [[expression clause alias] (mapv sqlf/to-sql expr)]
+                   (str expression " FILTER " clause (when alias (str " AS " alias)))))]
     (str (when (seq (:select sql-map)) ", ")
-         (sqlf/comma-join (map format fields)))))
+         (sqlf/comma-join (map format expr)))))
 
 (defmethod format-clause :do-update-set [[_ values] _]
   (let [fields (or (:fields values) values)
