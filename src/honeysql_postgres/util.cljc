@@ -1,5 +1,5 @@
 (ns ^{:doc "Postgres Honeysql utils"}
-    honeysql-postgres.util
+ honeysql-postgres.util
   (:refer-clojure :exclude [format partition-by])
   (:require [honeysql.format :as sqlf]))
 
@@ -27,8 +27,8 @@
         (prep-check '([:= :a :b] [:< :a :c])) => [:and [:= :a :b] [:< :a :c]]"
   [args]
   (let [preds (if (= 1 (count args))
-                  (first args)
-                  args)
+                (first args)
+                args)
         [logic-op preds] (if (keyword? (first preds))
                            [(first preds) (rest preds)]
                            [:and preds])]
