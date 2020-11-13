@@ -26,6 +26,7 @@ The query creation and usage is exactly the same as honeysql.
   - [pattern matching](#pattern-matching)
   - [except](#except)
   - [filter](#filter)
+  - [within group](#within-group)
   - [SQL functions](#sql-functions)
 - [License](#license)
 
@@ -167,7 +168,6 @@ The `ilike` and `not-ilike` operators can be used to query data using a pattern 
 ### except
 
 ```clj
-
 (sql/format
   {:except
     [{:select [:ip]}
@@ -185,6 +185,17 @@ The `ilike` and `not-ilike` operators can be used to query data using a pattern 
     (from (sql/raw "generate_series(1,10) AS s(i)"))
     (sql/format))
 => ["SELECT count(*) , count(*) FILTER (WHERE i < ?) AS foo, count(*) FILTER (WHERE i BETWEEN ? AND ?) AS bar FROM generate_series(1,10) AS s(i)" 5 3 10]
+```
+
+### within group
+
+``` clj
+(-> (select (sql/call :count :*))
+    (within-group (sql/call :percentile_disc
+                            (hsql-types/array [0.25 0.5 0.75]))
+                  (order-by :s.i))
+    (from (sql/raw "generate_series(1,10) AS s(i)"))
+    (sql/format))
 ```
 
 ### SQL functions
@@ -244,7 +255,7 @@ The following are the SQL functions added in `honeysql-postgres`
 => ["CHECK(a = b)"]
 
 (sql/format (sql/call :check [:= :a :b] [:= :c :d]))
-["CHECK(a = b AND c = d)"]
+=> ["CHECK(a = b AND c = d)"]
 ```
 
 ## License
