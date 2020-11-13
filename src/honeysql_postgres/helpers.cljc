@@ -4,8 +4,9 @@
 
 ;; Extension of the honeysql helper funcitons for postgreSQL
 
-(defn do-nothing [m]
+(defn do-nothing
   "Accepts a map and append {:do-nothing []} to it"
+  [m]
   (assoc m :do-nothing []))
 
 (defhelper do-update-set [m args]

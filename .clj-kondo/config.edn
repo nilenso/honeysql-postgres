@@ -1,0 +1,1 @@
+{:lint-as {honeysql.helpers/defhelper clj-kondo.lint-as/def-catch-all}}
