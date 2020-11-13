@@ -3,11 +3,9 @@
   :url "https://github.com/nilenso/honeysql-postgres"
   :license {:name "Eclipse Public License"
             :url  "http://www.eclipse.org/legal/epl-v10.html"}
-  ;; read dependencies from deps.edn
-  :plugins [[lein-tools-deps "0.4.5"]]
-  :middleware [lein-tools-deps.plugin/resolve-dependencies-with-deps-edn]
-  :lein-tools-deps/config {:config-files [:install :user :project]}
-  :clojure-executables ["/usr/local/bin/clojure"]
+  :dependencies [[org.clojure/clojure "1.10.1"]
+                 [honeysql "1.0.444"]]
+  :plugins [[lein-cljfmt "0.7.0"]]
   :tach {:test-runner-ns 'honeysql-postgres.postgres-test
          :source-paths   ["src" "test"]}
   :profiles {:dev {:plugins [[lein-tach "0.4.0"]]}})

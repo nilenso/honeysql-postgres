@@ -1,3 +1,0 @@
-{:deps
- {org.clojure/clojure {:mvn/version "1.10.1"}
-  honeysql            {:mvn/version "0.9.5" :exclusions [org.clojure/clojurescript]}}}
