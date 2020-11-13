@@ -196,6 +196,8 @@ The `ilike` and `not-ilike` operators can be used to query data using a pattern 
                   (order-by :s.i))
     (from (sql/raw "generate_series(1,10) AS s(i)"))
     (sql/format))
+=> ["SELECT count(*) , percentile_disc(ARRAY[?, ?, ?]) WITHIN GROUP (ORDER BY s.i) FROM generate_series(1,10) AS s(i)"
+    0.25 0.50 0.75]
 ```
 
 ### SQL functions
