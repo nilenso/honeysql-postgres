@@ -1,6 +1,7 @@
 (ns ^{:doc "Extension of the honeysql format functions specifically for postgreSQL"}
-    honeysql-postgres.format
+ honeysql-postgres.format
   (:require [clojure.string :as string]
+            [honeysql.format :as sqlf :refer [fn-handler format-clause format-modifiers]] ;; multi-methods
             [honeysql-postgres.util :as util]
             [honeysql.format :as sqlf :refer [fn-handler format-clause format-modifiers]]))
 
@@ -101,8 +102,8 @@
 
 (defmethod format-clause :on-conflict-constraint [[_ k] _]
   (str "ON CONFLICT ON CONSTRAINT " (-> k
-                                       util/get-first
-                                       sqlf/to-sql)))
+                                        util/get-first
+                                        sqlf/to-sql)))
 
 (defmethod format-clause :on-conflict [[_ ids] _]
   (str "ON CONFLICT " (util/comma-join-args ids)))

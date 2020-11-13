@@ -86,7 +86,6 @@
                            do-nothing))
                sql/format)))))
 
-
 (deftest upsert-where-test
   (is (= ["INSERT INTO user (phone, name) VALUES (?, ?) ON CONFLICT (phone) WHERE phone IS NOT NULL DO UPDATE SET phone = EXCLUDED.phone, name = EXCLUDED.name WHERE user.active = FALSE" "5555555" "John"]
          (sql/format
@@ -108,13 +107,12 @@
              (from (sql/raw "generate_series(1,10) AS s(i)"))
              (sql/format)))))
 
-
 (deftest returning-test
   (testing "returning clause in sql generation for postgresql"
     (is (= ["DELETE FROM distributors WHERE did > 10 RETURNING *"]
            (sql/format {:delete-from :distributors
                         :where [:> :did :10]
-                        :returning [:*] })))
+                        :returning [:*]})))
     (is (= ["UPDATE distributors SET dname = ? WHERE did = 2 RETURNING did dname" "Foo Bar Designs"]
            (-> (update :distributors)
                (sset {:dname "Foo Bar Designs"})
@@ -251,26 +249,25 @@
   (testing "select from table with ILIKE operator"
     (is (= ["SELECT * FROM products WHERE name ILIKE ?" "%name%"]
            (-> (select :*)
-              (from :products)
-              (where [:ilike :name "%name%"])
-              sql/format)))))
+               (from :products)
+               (where [:ilike :name "%name%"])
+               sql/format)))))
 
 (deftest select-where-not-ilike
   (testing "select from table with NOT ILIKE operator"
     (is (= ["SELECT * FROM products WHERE name NOT ILIKE ?" "%name%"]
            (-> (select :*)
-              (from :products)
-              (where [:not-ilike :name "%name%"])
-              sql/format)))))
+               (from :products)
+               (where [:not-ilike :name "%name%"])
+               sql/format)))))
 
 (deftest values-except-select
   (testing "select which values are not not present in a table"
     (is (= ["VALUES (?), (?), (?) EXCEPT SELECT id FROM images" 4 5 6]
            (sql/format
-                  {:except
-                   [{:values [[4] [5] [6]]}
-                    {:select [:id] :from [:images]}]})))))
-
+            {:except
+             [{:values [[4] [5] [6]]}
+              {:select [:id] :from [:images]}]})))))
 
 (deftest select-except-select
   (testing "select which rows are not present in another table"
@@ -280,7 +277,6 @@
              [{:select [:ip]}
               {:select [:ip] :from [:ip_location]}]})))))
 
-
 (deftest values-except-all-select
   (testing "select which values are not not present in a table"
     (is (= ["VALUES (?), (?), (?) EXCEPT ALL SELECT id FROM images" 4 5 6]
@@ -288,7 +284,6 @@
             {:except-all
              [{:values [[4] [5] [6]]}
               {:select [:id] :from [:images]}]})))))
-
 
 (deftest select-except-all-select
   (testing "select which rows are not present in another table"
@@ -302,6 +297,6 @@
   (testing "select distinct on"
     (is (= ["SELECT DISTINCT ON(\"a\", \"b\") \"c\" FROM \"products\" "]
            (-> (select :c)
-              (from :products)
-              (modifiers :distinct-on :a :b)
-              (sql/format :quoting :ansi))))))
+               (from :products)
+               (modifiers :distinct-on :a :b)
+               (sql/format :quoting :ansi))))))
