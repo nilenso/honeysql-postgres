@@ -129,7 +129,10 @@
   (sqlf/space-join (format-upsert-clause upsert)))
 
 (defmethod format-clause :returning [[_ fields] _]
-  (str "RETURNING " (sqlf/comma-join (map sqlf/to-sql fields))))
+  (->> (flatten fields)
+       (map sqlf/to-sql)
+       (sqlf/comma-join)
+       (str "RETURNING ")))
 
 (defmethod format-clause :create-view [[_ viewname] _]
   (str "CREATE VIEW " (-> viewname

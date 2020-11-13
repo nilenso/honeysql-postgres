@@ -71,7 +71,7 @@
            (sql/format {:delete-from :distributors
                         :where [:> :did :10]
                         :returning [:*]})))
-    (is (= ["UPDATE distributors SET dname = ? WHERE did = 2 RETURNING did dname" "Foo Bar Designs"]
+    (is (= ["UPDATE distributors SET dname = ? WHERE did = 2 RETURNING did, dname" "Foo Bar Designs"]
            (-> (update :distributors)
                (sset {:dname "Foo Bar Designs"})
                (where [:= :did :2])
