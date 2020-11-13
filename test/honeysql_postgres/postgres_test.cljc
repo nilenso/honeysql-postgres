@@ -25,7 +25,8 @@
               create-view
               over
               with-columns
-              filter]]
+              filter
+              withinn-group]]
             [honeysql.helpers
              :as
              sqlh
@@ -42,7 +43,8 @@
               query-values
               modifiers]]
             [honeysql.core :as sql]
-            [clojure.test :as test :refer [deftest is testing]]))
+            [clojure.test :as test :refer [deftest is testing]]
+            [honeysql.types :as hsql-types]))
 
 (deftest upsert-test
   (testing "upsert sql generation for postgresql"
@@ -300,3 +302,16 @@
                (from :products)
                (modifiers :distinct-on :a :b)
                (sql/format :quoting :ansi))))))
+
+(deftest within-group-test
+  (is (= ["rank() WITHIN GROUP (ORDER BY i)"]
+         (sql/format (within-group (sql/call :rank) (order-by :i)))))
+
+  (is (= ["SELECT count(*) , percentile_disc(ARRAY[?, ?, ?]) WITHIN GROUP (ORDER BY s.i) FROM generate_series(1,10) AS s(i)"
+          0.25 0.50 0.75]
+         (-> (select (sql/call :count :*))
+             (within-group (sql/call :percentile_disc
+                                     (hsql-types/array [0.25 0.5 0.75]))
+                           (order-by :s.i))
+             (from (sql/raw "generate_series(1,10) AS s(i)"))
+             (sql/format)))))
