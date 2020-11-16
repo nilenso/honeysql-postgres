@@ -8,4 +8,6 @@
   :plugins [[lein-cljfmt "0.7.0"]]
   :tach {:test-runner-ns 'honeysql-postgres.postgres-test
          :source-paths   ["src" "test"]}
-  :profiles {:dev {:plugins [[lein-tach "0.4.0"]]}})
+  :profiles {:dev {:plugins [[lein-tach "0.4.0"]]}
+             :ci {:dependencies [[seancorfield/readme "1.0.16"]]
+                  :aliases {"verify-readme" ["run" "-m" "seancorfield.readme"]}}})

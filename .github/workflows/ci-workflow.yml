@@ -46,3 +46,12 @@ jobs:
 
       - name: Run cljfmt check
         run: lein cljfmt check
+
+  verify-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Test Readme codeblocks
+        run: lein with-profile ci verify-readme
