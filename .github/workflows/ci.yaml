@@ -15,7 +15,7 @@ jobs:
           path: /root/.m2/repository
           key: ${{ env.cache-name }}-maven-${{ hashFiles('project.clj') }}
           restore-keys: |
-            ${{ runner.os }}-maven-
+            ${{ env.cache-name }}-maven-
 
       - name: Run tests
         run: lein test
