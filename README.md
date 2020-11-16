@@ -25,6 +25,7 @@ The query creation and usage is exactly the same as honeysql.
   - [alter table](#alter-table)
   - [pattern matching](#pattern-matching)
   - [except](#except)
+  - [filter](#filter)
   - [SQL functions](#sql-functions)
 - [License](#license)
 
