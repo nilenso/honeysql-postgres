@@ -1,0 +1,18 @@
+name: Publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Publish to Clojars
+      env:
+        CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
+        CLOJARS_DEPLOY_TOKEN: ${{ secrets.CLOJARS_DEPLOY_TOKEN }}
+      run: lein deploy clojars
