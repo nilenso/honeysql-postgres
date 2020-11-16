@@ -191,12 +191,10 @@ The `ilike` and `not-ilike` operators can be used to query data using a pattern 
 
 ``` clj
 (-> (select (sql/call :count :*))
-    (within-group (sql/call :percentile_disc
-                            (hsql-types/array [0.25 0.5 0.75]))
-                  (order-by :s.i))
+    (within-group [(sql/call :percentile_disc (hsql-types/array [0.25 0.5 0.75])) (order-by :s.i) :alias])
     (from (sql/raw "generate_series(1,10) AS s(i)"))
     (sql/format))
-=> ["SELECT count(*) , percentile_disc(ARRAY[?, ?, ?]) WITHIN GROUP (ORDER BY s.i) FROM generate_series(1,10) AS s(i)"
+=> ["SELECT count(*) , percentile_disc(ARRAY[?, ?, ?]) WITHIN GROUP (ORDER BY s.i) AS alias FROM generate_series(1,10) AS s(i)"
     0.25 0.50 0.75]
 ```
 

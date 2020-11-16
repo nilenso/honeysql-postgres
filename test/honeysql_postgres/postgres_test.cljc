@@ -26,7 +26,7 @@
               over
               with-columns
               filter
-              withinn-group]]
+              within-group]]
             [honeysql.helpers
              :as
              sqlh
@@ -305,13 +305,11 @@
 
 (deftest within-group-test
   (is (= ["rank() WITHIN GROUP (ORDER BY i)"]
-         (sql/format (within-group (sql/call :rank) (order-by :i)))))
+         (sql/format (within-group [(sql/call :rank) (order-by :i)]))))
 
-  (is (= ["SELECT count(*) , percentile_disc(ARRAY[?, ?, ?]) WITHIN GROUP (ORDER BY s.i) FROM generate_series(1,10) AS s(i)"
+  (is (= ["SELECT count(*) , percentile_disc(ARRAY[?, ?, ?]) WITHIN GROUP (ORDER BY s.i) AS alias FROM generate_series(1,10) AS s(i)"
           0.25 0.50 0.75]
          (-> (select (sql/call :count :*))
-             (within-group (sql/call :percentile_disc
-                                     (hsql-types/array [0.25 0.5 0.75]))
-                           (order-by :s.i))
+             (within-group [(sql/call :percentile_disc (hsql-types/array [0.25 0.5 0.75])) (order-by :s.i) :alias])
              (from (sql/raw "generate_series(1,10) AS s(i)"))
              (sql/format)))))
