@@ -1,6 +1,7 @@
 (ns honeysql-postgres.helpers
   (:refer-clojure :exclude [partition-by])
-  (:require [honeysql.helpers :as sqlh #?(:clj :refer :cljs :refer-macros) [defhelper]]))
+  (:require [honeysql-postgres.format :refer :all]
+            [honeysql.helpers :as sqlh #?(:clj :refer :cljs :refer-macros) [defhelper]]))
 
 ;; Extension of the honeysql helper funcitons for postgreSQL
 
