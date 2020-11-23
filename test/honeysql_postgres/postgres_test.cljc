@@ -1,7 +1,6 @@
 (ns honeysql-postgres.postgres-test
   (:refer-clojure :exclude [update partition-by])
-  (:require [honeysql-postgres.format :as sqlpf]
-            [honeysql-postgres.helpers :as sqlph :refer [upsert on-conflict do-nothing on-conflict-constraint
+  (:require [honeysql-postgres.helpers :as sqlph :refer [upsert on-conflict do-nothing on-conflict-constraint
                                                          returning do-update-set do-update-set!
                                                          alter-table rename-column drop-column
                                                          add-column partition-by insert-into-as
