@@ -6,5 +6,7 @@
                                        :sha     "b6b3193fcc42659d7e46ecd1884a228993441182"}}
                          :main-opts  ["-m" "cognitect.test-runner"
                                       "-d" "test"]}
+           :cljs-runner {:extra-deps {olical/cljs-test-runner {:mvn/version "3.7.0"}}
+                         :main-opts  ["-m" "cljs-test-runner.main"]}
            :jar         {:extra-deps {seancorfield/depstar {:mvn/version "2.0.165"}}
                          :main-opts  ["-m" "hf.depstar.jar" "honeysql-postgres.jar"]}}}
