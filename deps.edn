@@ -6,7 +6,12 @@
                                        :sha     "b6b3193fcc42659d7e46ecd1884a228993441182"}}
                          :main-opts  ["-m" "cognitect.test-runner"
                                       "-d" "test"]}
-           :cljs-runner {:extra-deps {olical/cljs-test-runner {:mvn/version "3.7.0"}}
+           :cljs-runner {:extra-deps {olical/cljs-test-runner {:mvn/version "3.8.0"}}
                          :main-opts  ["-m" "cljs-test-runner.main"]}
-           :jar         {:extra-deps {seancorfield/depstar {:mvn/version "2.0.165"}}
-                         :main-opts  ["-m" "hf.depstar.jar" "honeysql-postgres.jar"]}}}
+           :jar         {:replace-deps {seancorfield/depstar {:mvn/version "2.0.165"}}
+                         :exec-fn      hf.depstar/jar
+                         :exec-args    {}}
+           ;; this is for consistency with the alias shown in the depstar project:
+           :depstar     {:replace-deps {seancorfield/depstar {:mvn/version "2.0.165"}}
+                         :ns-default   hf.depstar
+                         :exec-args    {}}}}
