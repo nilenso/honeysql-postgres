@@ -6,6 +6,14 @@
   <artifactId>honeysql-postgres</artifactId>
   <version>0.2.6</version>
   <name>honeysql-postgres</name>
+  <description>PostgreSQL extension for honeysql</description>
+  <url>https://github.com/nilenso/honeysql-postgres</url>
+  <licenses>
+    <license>
+      <name>Eclipse Public License</name>
+      <url>http://www.eclipse.org/legal/epl-v10.html</url>
+    </license>
+  </licenses>
   <dependencies>
     <dependency>
       <groupId>org.clojure</groupId>
@@ -33,4 +41,11 @@
       <url>https://repo.clojars.org/</url>
     </repository>
   </repositories>
+  <distributionManagement>
+    <repository>
+      <id>clojars</id>
+      <name>Clojars repository</name>
+      <url>https://clojars.org/repo</url>
+    </repository>
+  </distributionManagement>
 </project>
