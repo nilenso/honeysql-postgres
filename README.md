@@ -149,8 +149,8 @@ use `alter-table` along with `add-column` & `drop-column` to modify table level 
 `create-extension` can be used to create extensions with a given keyword.
 ```clj
 (-> (create-extension :uuid-ossp :if-not-exists? true)
-               (sql/format :allow-dashed-names? true
-                           :quoting :ansi))
+    (sql/format :allow-dashed-names? true
+                :quoting :ansi))
 
 => ["CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\""]
 ```
@@ -158,7 +158,9 @@ use `alter-table` along with `add-column` & `drop-column` to modify table level 
 ### drop-extension
 `drop-extension` is used to drop extensions.
 ```clj
-(drop-extension "uuid-ossp")
+(-> (drop-extension :uuid-ossp)
+    (sql/format :allow-dashed-names? true
+                :quoting :ansi))
 => ["DROP EXTENSION \"uuid-ossp\""]
 ```
 
