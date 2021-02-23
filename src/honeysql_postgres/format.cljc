@@ -231,7 +231,7 @@
            util/get-first
            sqlf/to-sql)))
 
-(defmethod format-clause :create-extension [[_ [ extension-name if-not-exists]] _]
+(defmethod format-clause :create-extension [[_ [extension-name if-not-exists]] _]
   (str "CREATE EXTENSION "
        (when if-not-exists "IF NOT EXISTS ")
        (-> extension-name
