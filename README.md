@@ -1,10 +1,8 @@
-# honeysql-postgres [![Actions Status](https://github.com/nilenso/honeysql-postgres/workflows/CI/badge.svg)](https://github.com/nilenso/honeysql-postgres/actions)
-[![Clojars Project](https://img.shields.io/clojars/v/nilenso/honeysql-postgres.svg)](https://clojars.org/nilenso/honeysql-postgres) [![NPM Version](https://img.shields.io/npm/v/@honeysql/honeysql-postgres.svg)](https://www.npmjs.org/package/@honeysql/honeysql-postgres)
+# honeysql-postgres [![Actions Status](https://github.com/nilenso/honeysql-postgres/workflows/CI/badge.svg)](https://github.com/nilenso/honeysql-postgres/actions) [![Clojars Project](https://img.shields.io/clojars/v/nilenso/honeysql-postgres.svg)](https://clojars.org/nilenso/honeysql-postgres) [![NPM Version](https://img.shields.io/npm/v/@honeysql/honeysql-postgres.svg)](https://www.npmjs.org/package/@honeysql/honeysql-postgres) [![cljdoc badge](https://cljdoc.org/badge/nilenso/honeysql-postgres)](https://cljdoc.org/d/nilenso/honeysql-postgres/CURRENT)
 
 PostgreSQL extensions for the widely used [honeysql](https://github.com/jkk/honeysql).
 
 This library aims to extend the features of honeysql to support postgres specific SQL clauses and some basic SQL DDL in addition to the ones supported by the parent library. This keeps honeysql clean and single-purpose, any vendor-specific additions can simply be separate libraries that work on top.
-
 
 ## Index
 
@@ -20,6 +18,8 @@ This library aims to extend the features of honeysql to support postgres specifi
   - [create table](#create-table)
   - [drop table](#drop-table)
   - [alter table](#alter-table)
+  - [create extension](#create-extension)
+  - [drop extension](#drop-extension)
   - [pattern matching](#pattern-matching)
   - [except](#except)
   - [SQL functions](#sql-functions)
@@ -40,9 +40,10 @@ This library aims to extend the features of honeysql to support postgres specifi
 </dependency>
 ```
 ### REPL
-```clj
+```clojure
 (require '[honeysql.core :as sql]
          '[honeysql.helpers :refer :all]
+         '[honeysql-postgres.format]
          '[honeysql-postgres.helpers :as psqlh])
 ```
 
@@ -53,7 +54,7 @@ The query creation and usage is exactly the same as honeysql.
 
 ### upsert
 `upsert` can be written either way. You can make use of `do-update-set!` over `do-update-set`, if you want to modify the some column values in case of conflicts.
-```clj
+```clojure
 (-> (insert-into :distributors)
     (values [{:did 5 :dname "Gizmo Transglobal"}
              {:did 6 :dname "Associated Computing, Inc"}])
@@ -73,7 +74,7 @@ The query creation and usage is exactly the same as honeysql.
 
 ### insert into with alias
 `insert-into-as` can be used to write insert statements with table name aliased.
-```clj
+```clojure
 (-> (psqlh/insert-into-as :distributors :d)
     (values [{:did 5 :dname "Gizmo Transglobal"}
              {:did 6 :dname "Associated Computing, Inc"}])
@@ -87,7 +88,7 @@ The query creation and usage is exactly the same as honeysql.
 
 ### over
 You can make use of `over` to write window functions where it takes in vectors with aggregator functions and window functions along with optional alias like `(over [aggregator-function window-function alias])`, the can be coupled with the `window` clause to write window-function functions with alias that is later defines the window-function, like `(-> (over [aggregator-function :w]) (window :w window-function))`.
-```clj
+```clojure
 (-> (select :id)
     (psqlh/over
       [(sql/call :avg :salary) (-> (partition-by :department) (order-by [:designation])) :Average]
@@ -100,7 +101,7 @@ You can make use of `over` to write window functions where it takes in vectors w
 
 ### create view
 `create-view` can be used to create views
-```clj
+```clojure
 (-> (psqlh/create-view :metro)
     (select :*)
     (from :cities)
@@ -111,7 +112,7 @@ You can make use of `over` to write window functions where it takes in vectors w
 
 ### create table
 `create-table` and `with-columns` can be used to create tables along with the SQL functions, where `create-table` takes a table name as argument and `with-columns` takes a vector of vectors as argument, where the vectors describe the column properties as `[:column-name :datatype :constraints ... ]`.
-```clj
+```clojure
 (-> (psqlh/create-table :films)
     (psqlh/with-columns [[:code (sql/call :char 5) (sql/call :constraint :firstkey) (sql/call :primary-key)]
                          [:title (sql/call :varchar 40) (sql/call :not nil)]
@@ -124,14 +125,14 @@ You can make use of `over` to write window functions where it takes in vectors w
 
 ### drop table
 `drop-table` is used to drop tables
-```clj
+```clojure
 (sql/format (psqlh/drop-table :cities :towns :vilages))
 => ["DROP TABLE cities, towns, vilages"]
 ```
 
 ### alter table
 use `alter-table` along with `add-column` & `drop-column` to modify table level details
-```clj
+```clojure
 (-> (psqlh/alter-table :employees)
     (psqlh/add-column :address :text)
     sql/format)
@@ -143,10 +144,29 @@ use `alter-table` along with `add-column` & `drop-column` to modify table level 
 => ["ALTER TABLE employees DROP COLUMN address"]
 ```
 
+### create-extension
+`create-extension` can be used to create extensions with a given keyword.
+```clojure
+(-> (create-extension :uuid-ossp :if-not-exists? true)
+    (sql/format :allow-dashed-names? true
+                :quoting :ansi))
+
+=> ["CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\""]
+```
+
+### drop-extension
+`drop-extension` is used to drop extensions.
+```clojure
+(-> (drop-extension :uuid-ossp)
+    (sql/format :allow-dashed-names? true
+                :quoting :ansi))
+=> ["DROP EXTENSION \"uuid-ossp\""]
+```
+
 ### pattern matching
 The `ilike` and `not-ilike` operators can be used to query data using a pattern matching technique.
 - like
-```clj
+```clojure
 (-> (select :name)
     (from :products)
     (where [:ilike :name "%name%"])
@@ -154,7 +174,7 @@ The `ilike` and `not-ilike` operators can be used to query data using a pattern 
 => ["SELECT * FROM products WHERE name ILIKE ?" "%name%"]
 ```
 - not-ilike
-```clj
+```clojure
 (-> (select :name)
     (from :products)
     (where [:not-ilike :name "%name%"])
@@ -163,7 +183,7 @@ The `ilike` and `not-ilike` operators can be used to query data using a pattern 
 ```
 ### except
 
-```clj
+```clojure
 
 (sql/format
   {:except
@@ -176,12 +196,12 @@ The `ilike` and `not-ilike` operators can be used to query data using a pattern 
 ### SQL functions
 The following are the SQL functions added in `honeysql-postgres`
 - not
-```clj
+```clojure
 (sql/format (sql/call :not nil))
 => ["NOT NULL"]
 ```
 - primary-key
-```clj
+```clojure
 (sql/format (sql/call :primary-key))
 => ["PRIMARY KEY"]
 
@@ -189,7 +209,7 @@ The following are the SQL functions added in `honeysql-postgres`
 => ["PRIMARY KEY (arg1, arg2, ... )"]
 ```
 - unique
-```clj
+```clojure
 (sql/format (sql/call :unique))
 => ["UNIQUE"]
 
@@ -197,7 +217,7 @@ The following are the SQL functions added in `honeysql-postgres`
 => ["UNIQUE (arg1, arg2, ... )"]
 ```
 - foreign-key
-```clj
+```clojure
 (sql/format (sql/call :foreign-key))
 => ["FOREIGN KEY"]
 
@@ -205,27 +225,27 @@ The following are the SQL functions added in `honeysql-postgres`
 => ["FOREIGN KEY (arg1, arg2, ... )"]
 ```
 - references
-```clj
+```clojure
 (sql/format (sql/call :references :reftable :refcolumn))
 => ["REFERENCES reftable(refcolumn)"]
 ```
 - constraint
-```clj
+```clojure
 (sql/format (sql/call :constraint :name))
 => ["CONSTRAINT name"]
 ```
 - default
-```clj
+```clojure
 (sql/format (sql/call :default value))
 => ["DEFAULT value"]
 ```
 - nextval
-```clj
+```clojure
 (sql/format (sql/call :nextval value))
 => ["nextval('value')"]
 ```
 - check
-```clj
+```clojure
 (sql/format (sql/call :check [:= :a :b]))
 => ["CHECK(a = b)"]
 

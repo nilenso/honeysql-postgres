@@ -7,6 +7,8 @@
 (def ^:private custom-additions
   {:create-table 10
    :drop-table 10
+   :create-extension 10
+   :drop-extension 10
    :alter-table 20
    :add-column 30
    :drop-column 40
@@ -222,3 +224,16 @@
 
 (defmethod format-modifiers :distinct-on [[_ & fields]]
   (str "DISTINCT ON(" (sqlf/comma-join (map sqlf/to-sql fields)) ")"))
+
+(defmethod sqlf/format-clause :drop-extension [[_ [extension-name]] _]
+  (str "DROP EXTENSION "
+       (-> extension-name
+           util/get-first
+           sqlf/to-sql)))
+
+(defmethod format-clause :create-extension [[_ [ extension-name if-not-exists]] _]
+  (str "CREATE EXTENSION "
+       (when if-not-exists "IF NOT EXISTS ")
+       (-> extension-name
+           util/get-first
+           sqlf/to-sql)))

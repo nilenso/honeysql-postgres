@@ -1,0 +1,13 @@
+{:deps    {honeysql/honeysql {:mvn/version "0.9.5" :exclusions [org.clojure/clojurescript]}}
+ :paths   ["src"]
+ :aliases {:test        {:extra-paths ["test"]}
+           :runner      {:extra-deps {com.cognitect/test-runner
+                                      {:git/url "https://github.com/cognitect-labs/test-runner"
+                                       :sha     "b6b3193fcc42659d7e46ecd1884a228993441182"}}
+                         :main-opts  ["-m" "cognitect.test-runner"
+                                      "-d" "test"]}
+           :cljs-runner {:extra-deps {olical/cljs-test-runner {:mvn/version "3.8.0"}}
+                         :main-opts  ["-m" "cljs-test-runner.main"]}
+           :jar         {:replace-deps {seancorfield/depstar {:mvn/version "2.0.165"}}
+                         :exec-fn      hf.depstar/jar
+                         :exec-args    {}}}}
