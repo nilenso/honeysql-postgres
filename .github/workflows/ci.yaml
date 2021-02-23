@@ -4,7 +4,6 @@ on: [push]
 
 jobs:
   build:
-    name: Build
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -19,18 +18,23 @@ jobs:
         uses: DeLaGuardo/setup-clojure@master
         with:
           tools-deps: '1.10.1.754'
+
+  test:
+    steps:
       - name: Run tests (core)
         run: clojure -M:test:runner
       - name: Run tests (clojurescript)
         run: clojure -M:test:cljs-runner
-      - name: Run clj-kondo
-        run: |
-          curl -sLO https://raw.githubusercontent.com/borkdude/clj-kondo/master/script/install-clj-kondo
-          chmod +x install-clj-kondo
-          sudo ./install-clj-kondo
-      - name: Lint src
-        run: clj-kondo --lint src/
-      - name: Lint test
-        run: clj-kondo --lint test/
-      - name: Run cljfmt check
-        run: clojure -Sdeps '{:deps {cljfmt {:mvn/version "0.7.0"}}}' -m cljfmt.main check
+
+  lint:
+      run: |
+        curl -sLO https://raw.githubusercontent.com/borkdude/clj-kondo/master/script/install-clj-kondo
+        chmod +x install-clj-kondo
+        sudo ./install-clj-kondo
+    - steps:
+        - name: Lint src
+          run: clj-kondo --lint src/
+        - name: Lint test
+          run: clj-kondo --lint test/
+        - name: Run cljfmt check
+          run: clojure -Sdeps '{:deps {cljfmt {:mvn/version "0.7.0"}}}' -m cljfmt.main check
