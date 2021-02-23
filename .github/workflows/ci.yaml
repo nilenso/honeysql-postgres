@@ -16,9 +16,9 @@ jobs:
           restore-keys: |
             ${{ env.cache-name }}-maven-
       - name: Run tests (core)
-        run: clojure -M:test:runner
+        run: clj -M:test:runner
       - name: Run tests (clojurescript)
-        run: clojure -M:test:cljs-runner
+        run: clj -M:test:cljs-runner
 
   lint:
     runs-on: ubuntu-latest
@@ -39,4 +39,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run cljfmt check
-        run: clojure -Sdeps '{:deps {cljfmt {:mvn/version "0.7.0"}}}' -m cljfmt.main [check|fix]
+        run: clj -Sdeps '{:deps {cljfmt {:mvn/version "0.7.0"}}}' -m cljfmt.main [check|fix]
