@@ -6,13 +6,21 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
+    strategy:
+      java: '14'
     steps:
-    - uses: actions/checkout@v2
-    - name: Publish to Clojars
-      env:
-        CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
-        CLOJARS_DEPLOY_TOKEN: ${{ secrets.CLOJARS_DEPLOY_TOKEN }}
-      run: lein deploy clojars
+      - uses: actions/checkout@v2
+      - name: Setup Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ java }}
+      - name: Setup Clojure
+        uses: DeLaGuardo/setup-clojure@master
+        with:
+          tools-deps: '1.10.1.754'
+      - name: Publish to Clojars
+        env:
+          CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
+          CLOJARS_PASSWORD: ${{ secrets.CLOJARS_DEPLOY_TOKEN }}
+        run: clojure -X:deploy
