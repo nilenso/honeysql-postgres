@@ -18,18 +18,10 @@ jobs:
         uses: DeLaGuardo/setup-clojure@master
         with:
           tools-deps: '1.10.1.754'
-
-  test:
-    runs-on: ubuntu-latest
-    steps:
       - name: Run tests (core)
         run: clojure -M:test:runner
       - name: Run tests (clojurescript)
         run: clojure -M:test:cljs-runner
-
-  lint:
-    runs-on: ubuntu-latest
-    steps:
       - name: Install clj-kondo
         run: |
           curl -sLO https://raw.githubusercontent.com/borkdude/clj-kondo/master/script/install-clj-kondo
