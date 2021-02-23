@@ -1,0 +1,37 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [ '8', '11', '14' ]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+      - name: Setup Clojure
+        uses: DeLaGuardo/setup-clojure@master
+        with:
+          tools-deps: '1.10.1.754'
+      - name: Run tests (core)
+        run: clojure -M:test:runner
+      - name: Run tests (clojurescript)
+        run: clojure -M:test:cljs-runner
+      - name: Test Readme codeblocks
+        run: clojure -M:readme
+      - name: Install clj-kondo
+        run: |
+          curl -sLO https://raw.githubusercontent.com/borkdude/clj-kondo/master/script/install-clj-kondo
+          chmod +x install-clj-kondo
+          sudo ./install-clj-kondo
+      - name: Lint src
+        run: clj-kondo --lint src/
+      - name: Lint test
+        run: clj-kondo --lint test/
+      - name: Run cljfmt check
+        run: clojure -Sdeps '{:deps {cljfmt {:mvn/version "0.7.0"}}}' -m cljfmt.main check
