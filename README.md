@@ -19,6 +19,8 @@ This library aims to extend the features of honeysql to support postgres specifi
   - [create table](#create-table)
   - [drop table](#drop-table)
   - [alter table](#alter-table)
+  - [create extension](#create-extension)
+  - [drop extension](#drop-extension)
   - [pattern matching](#pattern-matching)
   - [except](#except)
   - [SQL functions](#sql-functions)
@@ -149,6 +151,24 @@ use `alter-table` along with `add-column` & `drop-column` to modify table level 
 => ["ALTER TABLE employees DROP COLUMN address"]
 ```
 
+### create-extension
+`create-extension` can be used to create extensions with a given keyword.
+```clojure
+(-> (create-extension :uuid-ossp :if-not-exists? true)
+    (sql/format :allow-dashed-names? true
+                :quoting :ansi))
+=> ["CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\""]
+```
+
+### drop-extension
+`drop-extension` is used to drop extensions.
+```clojure
+(-> (drop-extension :uuid-ossp)
+    (sql/format :allow-dashed-names? true
+                :quoting :ansi))
+=> ["DROP EXTENSION \"uuid-ossp\""]
+```
+
 ### pattern matching
 The `ilike` and `not-ilike` operators can be used to query data using a pattern matching technique.
 - like
@@ -168,7 +188,6 @@ The `ilike` and `not-ilike` operators can be used to query data using a pattern 
 => ["SELECT name FROM products WHERE name NOT ILIKE ?" "%name%"]
 ```
 ### except
-
 ```clojure
 (sql/format
   {:except
