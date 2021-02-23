@@ -4,7 +4,6 @@ PostgreSQL extensions for the widely used [honeysql](https://github.com/jkk/hone
 
 This library aims to extend the features of honeysql to support postgres specific SQL clauses and some basic SQL DDL in addition to the ones supported by the parent library. This keeps honeysql clean and single-purpose, any vendor-specific additions can simply be separate libraries that work on top.
 
-
 ## Index
 
 - [Usage](#usage)
