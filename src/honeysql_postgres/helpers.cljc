@@ -3,7 +3,7 @@
   (:require [honeysql-postgres.format]
             [honeysql.helpers :as sqlh #?(:clj :refer :cljs :refer-macros) [defhelper]]))
 
-;; Extension of the honeysql helper funcitons for postgreSQL
+;; Extension of the honeysql helper functions for postgreSQL
 
 (defn do-nothing
   "Accepts a map and append {:do-nothing []} to it"
