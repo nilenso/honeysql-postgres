@@ -8,7 +8,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
       - name: Maven cache
         uses: actions/cache@v2
         with:
@@ -16,33 +15,28 @@ jobs:
           key: ${{ env.cache-name }}-maven-${{ hashFiles('project.clj') }}
           restore-keys: |
             ${{ env.cache-name }}-maven-
-
-      - name: Run tests
-        run: lein test
+      - name: Run tests (core)
+        run: clojure -M:test:runner
+      - name: Run tests (clojurescript)
+        run: clojure -M:test:cljs-runner
 
   lint:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
-
       - name: Install clj-kondo
         run: |
           curl -sLO https://raw.githubusercontent.com/borkdude/clj-kondo/master/script/install-clj-kondo
           chmod +x install-clj-kondo
           sudo ./install-clj-kondo
-
       - name: Lint the source directory
         run: clj-kondo --lint src/
-
       - name: Lint the test directory
         run: clj-kondo --lint test/
 
   check-formatting:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
-
       - name: Run cljfmt check
-        run: lein cljfmt check
+        run: clojure -Sdeps '{:deps {cljfmt {:mvn/version "0.7.0"}}}' -m cljfmt.main [check|fix]
