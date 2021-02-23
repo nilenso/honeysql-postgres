@@ -20,9 +20,9 @@ jobs:
         with:
           tools-deps: '1.10.1.754'
       - name: Run tests (core)
-        run: clj -M:test:runner
+        run: clojure -M:test:runner
       - name: Run tests (clojurescript)
-        run: clj -M:test:cljs-runner
+        run: clojure -M:test:cljs-runner
       - name: Run clj-kondo
         run: |
           curl -sLO https://raw.githubusercontent.com/borkdude/clj-kondo/master/script/install-clj-kondo
@@ -33,4 +33,4 @@ jobs:
       - name: Lint test
         run: clj-kondo --lint test/
       - name: Run cljfmt check
-        run: clj -Sdeps '{:deps {cljfmt {:mvn/version "0.7.0"}}}' -m cljfmt.main check
+        run: clojure -Sdeps '{:deps {cljfmt {:mvn/version "0.7.0"}}}' -m cljfmt.main check
