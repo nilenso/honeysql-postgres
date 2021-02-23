@@ -8,6 +8,7 @@ jobs:
     strategy:
       matrix:
         java: [ '8', '11', '14' ]
+    name: For (java ${{ matrix.java }})
     steps:
       - uses: actions/checkout@v2
       - name: Setup Java
