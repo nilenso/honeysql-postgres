@@ -20,6 +20,7 @@ jobs:
           tools-deps: '1.10.1.754'
 
   test:
+    runs-on: ubuntu-latest
     steps:
       - name: Run tests (core)
         run: clojure -M:test:runner
@@ -27,6 +28,7 @@ jobs:
         run: clojure -M:test:cljs-runner
 
   lint:
+    runs-on: ubuntu-latest
     run: |
       curl -sLO https://raw.githubusercontent.com/borkdude/clj-kondo/master/script/install-clj-kondo
       chmod +x install-clj-kondo
