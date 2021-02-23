@@ -29,11 +29,12 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-    run: |
-      curl -sLO https://raw.githubusercontent.com/borkdude/clj-kondo/master/script/install-clj-kondo
-      chmod +x install-clj-kondo
-      sudo ./install-clj-kondo
     steps:
+      - name: Install clj-kondo
+        run: |
+          curl -sLO https://raw.githubusercontent.com/borkdude/clj-kondo/master/script/install-clj-kondo
+          chmod +x install-clj-kondo
+          sudo ./install-clj-kondo
       - name: Lint src
         run: clj-kondo --lint src/
       - name: Lint test
