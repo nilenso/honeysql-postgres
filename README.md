@@ -153,7 +153,7 @@ use `alter-table` along with `add-column` & `drop-column` to modify table level 
 ### create-extension
 `create-extension` can be used to create extensions with a given keyword.
 ```clojure
-(-> (create-extension :uuid-ossp :if-not-exists? true)
+(-> (psqlh/create-extension :uuid-ossp :if-not-exists? true)
     (sql/format :allow-dashed-names? true
                 :quoting :ansi))
 => ["CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\""]
@@ -162,7 +162,7 @@ use `alter-table` along with `add-column` & `drop-column` to modify table level 
 ### drop-extension
 `drop-extension` is used to drop extensions.
 ```clojure
-(-> (drop-extension :uuid-ossp)
+(-> (psqlh/drop-extension :uuid-ossp)
     (sql/format :allow-dashed-names? true
                 :quoting :ansi))
 => ["DROP EXTENSION \"uuid-ossp\""]
