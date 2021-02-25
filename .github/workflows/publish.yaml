@@ -23,4 +23,4 @@ jobs:
         env:
           CLOJARS_USERNAME: ${{ secrets.CLOJARS_USERNAME }}
           CLOJARS_PASSWORD: ${{ secrets.CLOJARS_DEPLOY_TOKEN }}
-        run: clojure -X:deploy
+        run: clojure -X:jar :jar honeysql-postgres.jar && clojure -X:deploy
