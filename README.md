@@ -41,9 +41,11 @@ This library aims to extend the features of honeysql to support postgres specifi
 ```
 ### REPL
 ```clojure
+; Note that `honeysql-postgres.format` and `honeysql-postgres.helpers`
+; must be required into the project for the extended features to work.
 (require '[honeysql.core :as sql]
-         '[honeysql.helpers :refer :all]
-         '[honeysql-postgres.format]
+         '[honeysql.helpers :refer :all :as sqlh]
+         '[honeysql-postgres.format :refer :all]
          '[honeysql-postgres.helpers :as psqlh])
 ```
 
@@ -58,18 +60,20 @@ The query creation and usage is exactly the same as honeysql.
 (-> (insert-into :distributors)
     (values [{:did 5 :dname "Gizmo Transglobal"}
              {:did 6 :dname "Associated Computing, Inc"}])
-    (psqlh/upsert (-> (on-conflict :did)
-                      (do-update-set :dname)))
+    (psqlh/upsert (-> (psqlh/on-conflict :did)
+                      (psqlh/do-update-set :dname)))
     (psqlh/returning :*)
     sql/format)
-=> ["INSERT INTO distributors (did, dname) VALUES (5, ?), (6, ?) ON CONFLICT (did) DO UPDATE SET dname = EXCLUDED.dname RETURNING *" "Gizmo Transglobal" "Associated Computing, Inc"]
+=> ["INSERT INTO distributors (did, dname) VALUES (?, ?), (?, ?) ON CONFLICT (did) DO UPDATE SET dname = EXCLUDED.dname RETURNING *"
+    5 "Gizmo Transglobal" 6 "Associated Computing, Inc"]
 
 (-> (insert-into :distributors)
     (values [{:did 23 :dname "Foo Distributors"}])
     (psqlh/on-conflict :did)
     (psqlh/do-update-set! [:dname "EXCLUDED.dname || ' (formerly ' || distributors.dname || ')'"] [:downer "EXCLUDED.downer"])
     sql/format)
-=> ["INSERT INTO distributors (did, dname) VALUES (23, ?) ON CONFLICT (did) DO UPDATE SET dname = ?, downer = ?" "Foo Distributors" "EXCLUDED.dname || ' (formerly ' || d.dname || ')'" "EXCLUDED.downer"]
+=> ["INSERT INTO distributors (did, dname) VALUES (?, ?) ON CONFLICT (did) DO UPDATE SET dname = ?, downer = ?"
+    23 "Foo Distributors" "EXCLUDED.dname || ' (formerly ' || distributors.dname || ')'" "EXCLUDED.downer"]
 ```
 
 ### insert into with alias
@@ -83,7 +87,8 @@ The query creation and usage is exactly the same as honeysql.
                       (where [:<> :d.zipcode "21201"])))
     (psqlh/returning :d.*)
     sql/format)
-=> ["INSERT INTO distributors AS d (did, dname) VALUES (5, ?), (6, ?) ON CONFLICT (did) DO UPDATE SET dname = EXCLUDED.dname WHERE d.zipcode <> ? RETURNING d.*" "Gizmo Transglobal" "Associated Computing, Inc" "21201"]
+=> ["INSERT INTO distributors AS d (did, dname) VALUES (?, ?), (?, ?) ON CONFLICT (did) DO UPDATE SET dname = EXCLUDED.dname WHERE d.zipcode <> ? RETURNING d.*"
+    5 "Gizmo Transglobal" 6 "Associated Computing, Inc" "21201"]
 ```
 
 ### over
@@ -91,7 +96,7 @@ You can make use of `over` to write window functions where it takes in vectors w
 ```clojure
 (-> (select :id)
     (psqlh/over
-      [(sql/call :avg :salary) (-> (partition-by :department) (order-by [:designation])) :Average]
+      [(sql/call :avg :salary) (-> (psqlh/partition-by :department) (order-by [:designation])) :Average]
       [(sql/call :max :salary) :w :MaxSalary])
     (from :employee)
     (psqlh/window :w (psqlh/partition-by :department))
@@ -120,7 +125,8 @@ You can make use of `over` to write window functions where it takes in vectors w
                          [:date_prod :date]
                          [:kind (sql/call :varchar 10)]])
     sql/format)
-=> ["CREATE TABLE films (code char(5) CONSTRAINT firstkey PRIMARY KEY, title varchar(40) NOT NULL, did integer NOT NULL, date_prod date, kind varchar(10))"]
+=> ["CREATE TABLE films (code char(?) CONSTRAINT firstkey PRIMARY KEY, title varchar(?) NOT NULL, did integer NOT NULL, date_prod date, kind varchar(?))"
+    5 40 10]
 ```
 
 ### drop table
@@ -147,17 +153,16 @@ use `alter-table` along with `add-column` & `drop-column` to modify table level 
 ### create-extension
 `create-extension` can be used to create extensions with a given keyword.
 ```clojure
-(-> (create-extension :uuid-ossp :if-not-exists? true)
+(-> (psqlh/create-extension :uuid-ossp :if-not-exists? true)
     (sql/format :allow-dashed-names? true
                 :quoting :ansi))
-
 => ["CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\""]
 ```
 
 ### drop-extension
 `drop-extension` is used to drop extensions.
 ```clojure
-(-> (drop-extension :uuid-ossp)
+(-> (psqlh/drop-extension :uuid-ossp)
     (sql/format :allow-dashed-names? true
                 :quoting :ansi))
 => ["DROP EXTENSION \"uuid-ossp\""]
@@ -171,7 +176,7 @@ The `ilike` and `not-ilike` operators can be used to query data using a pattern 
     (from :products)
     (where [:ilike :name "%name%"])
     sql/format)
-=> ["SELECT * FROM products WHERE name ILIKE ?" "%name%"]
+=> ["SELECT name FROM products WHERE name ILIKE ?" "%name%"]
 ```
 - not-ilike
 ```clojure
@@ -179,12 +184,10 @@ The `ilike` and `not-ilike` operators can be used to query data using a pattern 
     (from :products)
     (where [:not-ilike :name "%name%"])
     sql/format)
-=> ["SELECT * FROM products WHERE name NOT ILIKE ?" "%name%"]
+=> ["SELECT name FROM products WHERE name NOT ILIKE ?" "%name%"]
 ```
 ### except
-
 ```clojure
-
 (sql/format
   {:except
     [{:select [:ip]}
@@ -205,24 +208,24 @@ The following are the SQL functions added in `honeysql-postgres`
 (sql/format (sql/call :primary-key))
 => ["PRIMARY KEY"]
 
-(sql/format (sql/call :primary-key :arg1 :arg2 ... ))
-=> ["PRIMARY KEY (arg1, arg2, ... )"]
+(sql/format (sql/call :primary-key :arg1 :arg2))
+=> ["PRIMARY KEY(arg1, arg2)"]
 ```
 - unique
 ```clojure
 (sql/format (sql/call :unique))
 => ["UNIQUE"]
 
-(sql/format (sql/call :unique :arg1 :arg2 ... ))
-=> ["UNIQUE (arg1, arg2, ... )"]
+(sql/format (sql/call :unique :arg1 :arg2))
+=> ["UNIQUE(arg1, arg2)"]
 ```
 - foreign-key
 ```clojure
 (sql/format (sql/call :foreign-key))
 => ["FOREIGN KEY"]
 
-(sql/format (sql/call :foreign-key :arg1 :arg2 ... ))
-=> ["FOREIGN KEY (arg1, arg2, ... )"]
+(sql/format (sql/call :foreign-key :arg1 :arg2))
+=> ["FOREIGN KEY(arg1, arg2)"]
 ```
 - references
 ```clojure
@@ -236,12 +239,12 @@ The following are the SQL functions added in `honeysql-postgres`
 ```
 - default
 ```clojure
-(sql/format (sql/call :default value))
+(sql/format (sql/call :default :value))
 => ["DEFAULT value"]
 ```
 - nextval
 ```clojure
-(sql/format (sql/call :nextval value))
+(sql/format (sql/call :nextval :value))
 => ["nextval('value')"]
 ```
 - check

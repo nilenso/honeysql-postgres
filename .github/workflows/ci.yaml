@@ -23,6 +23,8 @@ jobs:
         run: clojure -M:test:runner
       - name: Run tests (clojurescript)
         run: clojure -M:test:cljs-runner
+      - name: Run tests (readme codeblocks)
+        run: clojure -M:readme
       - name: Install clj-kondo
         run: |
           curl -sLO https://raw.githubusercontent.com/borkdude/clj-kondo/master/script/install-clj-kondo
