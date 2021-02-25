@@ -124,8 +124,7 @@
            (str " WHERE " (sqlf/format-predicate* where))))))
 
 (defn- format-upsert-clause [upsert]
-  (let [ks (keys upsert)]
-    (map #(format-clause % (find upsert %)) upsert)))
+  (map #(format-clause % (find upsert %)) upsert))
 
 (defmethod format-clause :upsert [[_ upsert] _]
   (sqlf/space-join (format-upsert-clause upsert)))
@@ -174,7 +173,7 @@
   (str
    ;; if the select clause has any columns in it then add a comma before the
    ;; window functions
-   (if (seq (:select complete-sql-map)) ", ")
+   (when (seq (:select complete-sql-map)) ", ")
    (->> fields
         (map format-over-clause)
         sqlf/comma-join)))
@@ -232,7 +231,7 @@
            util/get-first
            sqlf/to-sql)))
 
-(defmethod format-clause :create-extension [[_ [ extension-name if-not-exists]] _]
+(defmethod format-clause :create-extension [[_ [extension-name if-not-exists]] _]
   (str "CREATE EXTENSION "
        (when if-not-exists "IF NOT EXISTS ")
        (-> extension-name

@@ -8,3 +8,6 @@ pom.xml.asc
 /.nrepl-port
 .hgignore
 .hg/
+.clj-kondo/.cache
+.lsp/
+cljs-test-runner-out/
