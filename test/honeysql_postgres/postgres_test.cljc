@@ -1,5 +1,5 @@
 (ns honeysql-postgres.postgres-test
-  (:refer-clojure :exclude [update partition-by])
+  (:refer-clojure :exclude [update partition-by filter])
   (:require [honeysql-postgres.helpers :as sqlph :refer [upsert on-conflict do-nothing on-conflict-constraint
                                                          returning do-update-set do-update-set!
                                                          alter-table rename-column drop-column

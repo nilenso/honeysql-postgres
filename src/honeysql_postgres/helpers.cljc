@@ -1,5 +1,5 @@
 (ns honeysql-postgres.helpers
-  (:refer-clojure :exclude [partition-by])
+  (:refer-clojure :exclude [partition-by filter])
   (:require [honeysql-postgres.format]
             [honeysql.helpers :as sqlh #?(:clj :refer :cljs :refer-macros) [defhelper]]))
 
