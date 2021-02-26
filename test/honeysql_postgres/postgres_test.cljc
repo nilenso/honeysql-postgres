@@ -67,7 +67,7 @@
 
 (deftest filter-test
   (is (= ["count(*) FILTER (WHERE NOT i BETWEEN ? AND ?) AS a" 3 5]
-         (sql/format (filter [(sql/call :count :*)(where [:not [:between :i 3 5]]) :a]))))
+         (sql/format (filter [(sql/call :count :*) (where [:not [:between :i 3 5]]) :a]))))
 
   (is (= ["SELECT count(*) , count(*) FILTER (WHERE s.i < ?) AS foo, count(*) FILTER (WHERE s.i BETWEEN ? AND ?) AS bar FROM generate_series(1,10) AS s(i)" 5 3 10]
          (-> (select (sql/call :count :*))
