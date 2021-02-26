@@ -7,6 +7,8 @@
 (def ^:private custom-additions
   {:create-table 10
    :drop-table 10
+   :create-extension 10
+   :drop-extension 10
    :alter-table 20
    :add-column 30
    :drop-column 40
@@ -130,8 +132,7 @@
            (str " WHERE " (sqlf/format-predicate* where))))))
 
 (defn- format-upsert-clause [upsert]
-  (let [ks (keys upsert)]
-    (map #(format-clause % (find upsert %)) upsert)))
+  (map #(format-clause % (find upsert %)) upsert))
 
 (defmethod format-clause :upsert [[_ upsert] _]
   (sqlf/space-join (format-upsert-clause upsert)))
@@ -180,7 +181,7 @@
   (str
    ;; if the select clause has any columns in it then add a comma before the
    ;; window functions
-   (if (seq (:select complete-sql-map)) ", ")
+   (when (seq (:select complete-sql-map)) ", ")
    (->> fields
         (map format-over-clause)
         sqlf/comma-join)))
@@ -231,3 +232,16 @@
 
 (defmethod format-modifiers :distinct-on [[_ & fields]]
   (str "DISTINCT ON(" (sqlf/comma-join (map sqlf/to-sql fields)) ")"))
+
+(defmethod sqlf/format-clause :drop-extension [[_ [extension-name]] _]
+  (str "DROP EXTENSION "
+       (-> extension-name
+           util/get-first
+           sqlf/to-sql)))
+
+(defmethod format-clause :create-extension [[_ [extension-name if-not-exists]] _]
+  (str "CREATE EXTENSION "
+       (when if-not-exists "IF NOT EXISTS ")
+       (-> extension-name
+           util/get-first
+           sqlf/to-sql)))

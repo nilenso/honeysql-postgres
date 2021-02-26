@@ -1,46 +1,15 @@
 (ns honeysql-postgres.postgres-test
   (:refer-clojure :exclude [update partition-by])
-  (:require [honeysql-postgres.format :as sqlpf]
-            [honeysql-postgres.helpers
-             :as
-             sqlph
-             :refer
-             [upsert
-              on-conflict
-              do-nothing
-              on-conflict-constraint
-              returning
-              do-update-set
-              do-update-set!
-              alter-table
-              rename-column
-              drop-column
-              add-column
-              partition-by
-              insert-into-as
-              create-table
-              rename-table
-              drop-table
-              window
-              create-view
-              over
-              with-columns
-              filter]]
-            [honeysql.helpers
-             :as
-             sqlh
-             :refer
-             [insert-into
-              values
-              where
-              select
-              columns
-              from
-              order-by
-              update
-              sset
-              query-values
-              modifiers]]
+  (:require [honeysql-postgres.helpers :as sqlph :refer [upsert on-conflict do-nothing on-conflict-constraint
+                                                         returning do-update-set do-update-set!
+                                                         alter-table rename-column drop-column
+                                                         add-column partition-by insert-into-as
+                                                         create-table rename-table drop-table
+                                                         window create-view over with-columns
+                                                         create-extension drop-extension filter]]
+            [honeysql.helpers :as sqlh :refer [insert-into values where select columns
+                                               from order-by update sset query-values
+                                               modifiers]]
             [honeysql.core :as sql]
             [clojure.test :as test :refer [deftest is testing]]))
 
@@ -300,3 +269,22 @@
                (from :products)
                (modifiers :distinct-on :a :b)
                (sql/format :quoting :ansi))))))
+
+(deftest create-extension-test
+  (testing "create extension"
+    (is (= ["CREATE EXTENSION \"uuid-ossp\""]
+           (-> (create-extension :uuid-ossp)
+               (sql/format :allow-dashed-names? true
+                           :quoting :ansi)))))
+  (testing "create extension if not exists"
+    (is (= ["CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\""]
+           (-> (create-extension :uuid-ossp :if-not-exists? true)
+               (sql/format :allow-dashed-names? true
+                           :quoting :ansi))))))
+
+(deftest drop-extension-test
+  (testing "create extension"
+    (is (= ["DROP EXTENSION \"uuid-ossp\""]
+           (-> (drop-extension :uuid-ossp)
+               (sql/format :allow-dashed-names? true
+                           :quoting :ansi))))))
