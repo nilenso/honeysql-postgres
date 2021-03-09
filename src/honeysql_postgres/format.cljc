@@ -119,9 +119,14 @@
 (defmethod format-clause :filter [[_ expr] sql-map]
   (let [format (fn [expr]
                  (let [[expression clause alias] (mapv sqlf/to-sql expr)]
-                   (str expression " FILTER " clause (when alias (str " AS " alias)))))]
-    (str (when (seq (:select sql-map)) ", ")
-         (sqlf/comma-join (map format expr)))))
+                   (->> alias
+                        (str " AS ")
+                        (when alias)
+                        (str expression " FILTER " clause))))]
+    (->> expr
+         (map format)
+         sqlf/comma-join
+         (str (when (seq (:select sql-map)) ", ")))))
 
 (defmethod format-clause :do-update-set [[_ values] _]
   (let [fields (or (:fields values) values)
