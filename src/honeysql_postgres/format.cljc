@@ -231,9 +231,15 @@
 (defmethod format-clause :within-group [[_ expr] m]
   (let [format (fn [expr]
                  (let [[expression clause alias] (map sqlf/to-sql expr)]
-                   (str expression " WITHIN GROUP " clause (when alias (str " AS " alias)))))]
-    (str (when (seq (:select m)) ", ")
-         (sqlf/comma-join (map format expr)))))
+                   (->> alias
+                        (str " AS ")
+                        (when alias)
+                        (str expression " WITHIN GROUP " clause))))]
+    (-> m
+        :select
+        seq
+        (when ", ")
+        (str (sqlf/comma-join (map format expr))))))
 
 (override-default-clause-priority)
 
