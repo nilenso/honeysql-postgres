@@ -11,7 +11,8 @@
                                                from order-by update sset query-values
                                                modifiers]]
             [honeysql.core :as sql]
-            [clojure.test :as test :refer [deftest is testing]]))
+            [clojure.test :as test :refer [deftest is testing]]
+            [clojure.string :as str]))
 
 (deftest upsert-test
   (testing "upsert sql generation for postgresql"
@@ -69,14 +70,15 @@
   (testing "returning clause in sql generation for postgresql"
     (is (= ["DELETE FROM distributors WHERE did > 10 RETURNING *"]
            (sql/format {:delete-from :distributors
-                        :where [:> :did :10]
-                        :returning [:*]})))
-    (is (= ["UPDATE distributors SET dname = ? WHERE did = 2 RETURNING did dname" "Foo Bar Designs"]
-           (-> (update :distributors)
-               (sset {:dname "Foo Bar Designs"})
-               (where [:= :did :2])
-               (returning [:did :dname])
-               sql/format)))))
+                        :where       [:> :did :10]
+                        :returning   [:*]})))
+    (doseq [returning-columns (reductions conj [] [:did :dname :nos])]
+      (is (= [(str "UPDATE distributors SET dname = ? WHERE did = 2 RETURNING " (str/join ", " (map name returning-columns))) "Foo Bar Designs"]
+             (-> (update :distributors)
+                 (sset {:dname "Foo Bar Designs"})
+                 (where [:= :did :2])
+                 (returning returning-columns)
+                 sql/format))))))
 
 (deftest create-view-test
   (testing "creating a view from a table"
