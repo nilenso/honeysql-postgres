@@ -4,6 +4,16 @@ PostgreSQL extensions for the widely used [honeysql](https://github.com/jkk/hone
 
 This library aims to extend the features of honeysql to support postgres specific SQL clauses and some basic SQL DDL in addition to the ones supported by the parent library. This keeps honeysql clean and single-purpose, any vendor-specific additions can simply be separate libraries that work on top.
 
+## Honeysql 2.0
+
+Work is underway to enhance the core `honeysql` library to directly provide a large subset of postgres features from this extension. You can read more about it:
+
+- [Note](https://github.com/nilenso/honeysql-postgres/issues/62) from Sean Corfield 
+- [Milestone](https://github.com/seancorfield/honeysql/milestone/7) for tracking progress
+
+Regardless of `honeysql` 2.0's feature parity with `honeysql-postgres` and general production stability, this library **will** continue to be maintained going forward.
+
+
 ## Release
 
 ### Build
