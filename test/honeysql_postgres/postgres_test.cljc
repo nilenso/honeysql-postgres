@@ -1,18 +1,52 @@
 (ns honeysql-postgres.postgres-test
   (:refer-clojure :exclude [update partition-by filter])
-  (:require [honeysql-postgres.helpers :as sqlph :refer [upsert on-conflict do-nothing on-conflict-constraint
-                                                         returning do-update-set do-update-set!
-                                                         alter-table rename-column drop-column
-                                                         add-column partition-by insert-into-as
-                                                         create-table rename-table drop-table
-                                                         window create-view over with-columns
-                                                         create-extension drop-extension filter]]
-            [honeysql.helpers :as sqlh :refer [insert-into values where select columns
-                                               from order-by update sset query-values
-                                               modifiers]]
-            [honeysql.core :as sql]
+  (:require [clojure.string :as str]
             [clojure.test :as test :refer [deftest is testing]]
-            [clojure.string :as str]))
+            [honeysql-postgres.helpers
+             :as
+             sqlph
+             :refer
+             [add-column
+              alter-table
+              create-extension
+              create-table
+              create-view
+              do-nothing
+              do-update-set
+              do-update-set!
+              drop-column
+              drop-extension
+              drop-table
+              filter
+              insert-into-as
+              on-conflict
+              on-conflict-constraint
+              over
+              partition-by
+              rename-column
+              rename-table
+              returning
+              upsert
+              window
+              with-columns
+              within-group]]
+            [honeysql.core :as sql]
+            [honeysql.helpers
+             :as
+             sqlh
+             :refer
+             [columns
+              from
+              insert-into
+              modifiers
+              order-by
+              query-values
+              select
+              sset
+              update
+              values
+              where]]
+            [honeysql.types :as hsql-types]))
 
 (deftest upsert-test
   (testing "upsert sql generation for postgresql"
@@ -272,6 +306,16 @@
                (modifiers :distinct-on :a :b)
                (sql/format :quoting :ansi))))))
 
+(deftest within-group-test
+  (is (= ["rank() WITHIN GROUP (ORDER BY i)"]
+         (sql/format (within-group [(sql/call :rank) (order-by :i)]))))
+
+  (is (= ["SELECT count(*) , percentile_disc(ARRAY[?, ?, ?]) WITHIN GROUP (ORDER BY s.i) AS alias FROM generate_series(1,10) AS s(i)"
+          0.25 0.50 0.75]
+         (-> (select (sql/call :count :*))
+             (within-group [(sql/call :percentile_disc (hsql-types/array [0.25 0.5 0.75])) (order-by :s.i) :alias])
+             (from (sql/raw "generate_series(1,10) AS s(i)"))
+             (sql/format)))))
 (deftest create-extension-test
   (testing "create extension"
     (is (= ["CREATE EXTENSION \"uuid-ossp\""]

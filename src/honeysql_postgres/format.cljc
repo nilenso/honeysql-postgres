@@ -13,7 +13,8 @@
    :add-column 30
    :drop-column 40
    :create-view 40
-   :filter 54
+   :filter 55
+   :within-group 55
    :over 55
    :insert-into-as 60
    :partition-by 165
@@ -235,6 +236,19 @@
 (defmethod format-clause :except-all [[_ maps] _]
   (binding [sqlf/*subquery?* false]
     (string/join " EXCEPT ALL " (map sqlf/to-sql maps))))
+
+(defmethod format-clause :within-group [[_ expr] m]
+  (let [format (fn [expr]
+                 (let [[expression clause alias] (map sqlf/to-sql expr)]
+                   (->> alias
+                        (str " AS ")
+                        (when alias)
+                        (str expression " WITHIN GROUP " clause))))]
+    (-> m
+        :select
+        seq
+        (when ", ")
+        (str (sqlf/comma-join (map format expr))))))
 
 (override-default-clause-priority)
 

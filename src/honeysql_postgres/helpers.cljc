@@ -72,6 +72,9 @@
 (defhelper insert-into-as [m fields]
   (assoc m :insert-into-as (sqlh/collify fields)))
 
+(defhelper within-group [m args]
+  (assoc m :within-group (sqlh/collify args)))
+
 (defhelper create-extension [m extension-name]
   (assoc m :create-extension (sqlh/collify extension-name)))
 
