@@ -7,6 +7,8 @@
 (def ^:private custom-additions
   {:create-table 10
    :drop-table 10
+   :create-extension 10
+   :drop-extension 10
    :alter-table 20
    :add-column 30
    :drop-column 40
@@ -118,9 +120,14 @@
 (defmethod format-clause :filter [[_ expr] sql-map]
   (let [format (fn [expr]
                  (let [[expression clause alias] (mapv sqlf/to-sql expr)]
-                   (str expression " FILTER " clause (when alias (str " AS " alias)))))]
-    (str (when (seq (:select sql-map)) ", ")
-         (sqlf/comma-join (map format expr)))))
+                   (->> alias
+                        (str " AS ")
+                        (when alias)
+                        (str expression " FILTER " clause))))]
+    (->> expr
+         (map format)
+         sqlf/comma-join
+         (str (when (seq (:select sql-map)) ", ")))))
 
 (defmethod format-clause :do-update-set [[_ values] _]
   (let [fields (or (:fields values) values)
@@ -131,14 +138,16 @@
            (str " WHERE " (sqlf/format-predicate* where))))))
 
 (defn- format-upsert-clause [upsert]
-  (let [ks (keys upsert)]
-    (map #(format-clause % (find upsert %)) upsert)))
+  (map #(format-clause % (find upsert %)) upsert))
 
 (defmethod format-clause :upsert [[_ upsert] _]
   (sqlf/space-join (format-upsert-clause upsert)))
 
 (defmethod format-clause :returning [[_ fields] _]
-  (str "RETURNING " (sqlf/comma-join (map sqlf/to-sql fields))))
+  (->> (flatten fields)
+       (map sqlf/to-sql)
+       (sqlf/comma-join)
+       (str "RETURNING ")))
 
 (defmethod format-clause :create-view [[_ viewname] _]
   (str "CREATE VIEW " (-> viewname
@@ -181,7 +190,7 @@
   (str
    ;; if the select clause has any columns in it then add a comma before the
    ;; window functions
-   (if (seq (:select complete-sql-map)) ", ")
+   (when (seq (:select complete-sql-map)) ", ")
    (->> fields
         (map format-over-clause)
         sqlf/comma-join)))
@@ -245,3 +254,16 @@
 
 (defmethod format-modifiers :distinct-on [[_ & fields]]
   (str "DISTINCT ON(" (sqlf/comma-join (map sqlf/to-sql fields)) ")"))
+
+(defmethod sqlf/format-clause :drop-extension [[_ [extension-name]] _]
+  (str "DROP EXTENSION "
+       (-> extension-name
+           util/get-first
+           sqlf/to-sql)))
+
+(defmethod format-clause :create-extension [[_ [extension-name if-not-exists]] _]
+  (str "CREATE EXTENSION "
+       (when if-not-exists "IF NOT EXISTS ")
+       (-> extension-name
+           util/get-first
+           sqlf/to-sql)))

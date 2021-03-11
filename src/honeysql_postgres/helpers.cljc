@@ -1,11 +1,13 @@
 (ns honeysql-postgres.helpers
-  (:refer-clojure :exclude [partition-by])
-  (:require [honeysql.helpers :as sqlh #?(:clj :refer :cljs :refer-macros) [defhelper]]))
+  (:refer-clojure :exclude [partition-by filter])
+  (:require [honeysql-postgres.format]
+            [honeysql.helpers :as sqlh #?(:clj :refer :cljs :refer-macros) [defhelper]]))
 
-;; Extension of the honeysql helper funcitons for postgreSQL
+;; Extension of the honeysql helper functions for postgreSQL
 
-(defn do-nothing [m]
+(defn do-nothing
   "Accepts a map and append {:do-nothing []} to it"
+  [m]
   (assoc m :do-nothing []))
 
 (defhelper do-update-set [m args]
@@ -72,3 +74,9 @@
 
 (defhelper within-group [m args]
   (assoc m :within-group (sqlh/collify args)))
+
+(defhelper create-extension [m extension-name]
+  (assoc m :create-extension (sqlh/collify extension-name)))
+
+(defhelper drop-extension [m extension-name]
+  (assoc m :drop-extension (sqlh/collify extension-name)))

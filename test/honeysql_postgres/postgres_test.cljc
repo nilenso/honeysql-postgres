@@ -1,49 +1,51 @@
 (ns honeysql-postgres.postgres-test
   (:refer-clojure :exclude [update partition-by])
-  (:require [honeysql-postgres.format :as sqlpf]
+  (:require [clojure.string :as str]
+            [clojure.test :as test :refer [deftest is testing]]
             [honeysql-postgres.helpers
              :as
              sqlph
              :refer
-             [upsert
-              on-conflict
+             [add-column
+              alter-table
+              create-extension
+              create-table
+              create-view
               do-nothing
-              on-conflict-constraint
-              returning
               do-update-set
               do-update-set!
-              alter-table
-              rename-column
               drop-column
-              add-column
-              partition-by
-              insert-into-as
-              create-table
-              rename-table
+              drop-extension
               drop-table
-              window
-              create-view
-              over
-              with-columns
               filter
+              insert-into-as
+              on-conflict
+              on-conflict-constraint
+              over
+              partition-by
+              rename-column
+              rename-table
+              returning
+              upsert
+              window
+              with-columns
               within-group]]
+            [honeysql.core :as sql]
             [honeysql.helpers
              :as
              sqlh
              :refer
-             [insert-into
-              values
-              where
-              select
-              columns
+             [columns
               from
+              insert-into
+              modifiers
               order-by
-              update
-              sset
               query-values
-              modifiers]]
-            [honeysql.core :as sql]
-            [clojure.test :as test :refer [deftest is testing]]
+              select
+              sset
+              update
+              values
+              where]]
             [honeysql.types :as hsql-types]))
 
 (deftest upsert-test
@@ -100,7 +102,7 @@
 
 (deftest filter-test
   (is (= ["count(*) FILTER (WHERE NOT i BETWEEN ? AND ?) AS a" 3 5]
-         (sql/format (filter [(sql/call :count :*)(where [:not [:between :i 3 5]]) :a]))))
+         (sql/format (filter [(sql/call :count :*) (where [:not [:between :i 3 5]]) :a]))))
 
   (is (= ["SELECT count(*) , count(*) FILTER (WHERE s.i < ?) AS foo, count(*) FILTER (WHERE s.i BETWEEN ? AND ?) AS bar FROM generate_series(1,10) AS s(i)" 5 3 10]
          (-> (select (sql/call :count :*))
@@ -113,14 +115,15 @@
   (testing "returning clause in sql generation for postgresql"
     (is (= ["DELETE FROM distributors WHERE did > 10 RETURNING *"]
            (sql/format {:delete-from :distributors
-                        :where [:> :did :10]
-                        :returning [:*]})))
-    (is (= ["UPDATE distributors SET dname = ? WHERE did = 2 RETURNING did dname" "Foo Bar Designs"]
-           (-> (update :distributors)
-               (sset {:dname "Foo Bar Designs"})
-               (where [:= :did :2])
-               (returning [:did :dname])
-               sql/format)))))
+                        :where       [:> :did :10]
+                        :returning   [:*]})))
+    (doseq [returning-columns (reductions conj [] [:did :dname :nos])]
+      (is (= [(str "UPDATE distributors SET dname = ? WHERE did = 2 RETURNING " (str/join ", " (map name returning-columns))) "Foo Bar Designs"]
+             (-> (update :distributors)
+                 (sset {:dname "Foo Bar Designs"})
+                 (where [:= :did :2])
+                 (returning returning-columns)
+                 sql/format))))))
 
 (deftest create-view-test
   (testing "creating a view from a table"
@@ -313,3 +316,21 @@
              (within-group [(sql/call :percentile_disc (hsql-types/array [0.25 0.5 0.75])) (order-by :s.i) :alias])
              (from (sql/raw "generate_series(1,10) AS s(i)"))
              (sql/format)))))
+(deftest create-extension-test
+  (testing "create extension"
+    (is (= ["CREATE EXTENSION \"uuid-ossp\""]
+           (-> (create-extension :uuid-ossp)
+               (sql/format :allow-dashed-names? true
+                           :quoting :ansi)))))
+  (testing "create extension if not exists"
+    (is (= ["CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\""]
+           (-> (create-extension :uuid-ossp :if-not-exists? true)
+               (sql/format :allow-dashed-names? true
+                           :quoting :ansi))))))
+
+(deftest drop-extension-test
+  (testing "create extension"
+    (is (= ["DROP EXTENSION \"uuid-ossp\""]
+           (-> (drop-extension :uuid-ossp)
+               (sql/format :allow-dashed-names? true
+                           :quoting :ansi))))))
