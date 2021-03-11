@@ -4,7 +4,7 @@
   <packaging>jar</packaging>
   <groupId>nilenso</groupId>
   <artifactId>honeysql-postgres</artifactId>
-  <version>0.3.104</version>
+  <version>0.4.112</version>
   <name>honeysql-postgres</name>
   <description>PostgreSQL extension for honeysql</description>
   <url>https://github.com/nilenso/honeysql-postgres</url>
@@ -14,6 +14,12 @@
       <url>http://www.eclipse.org/legal/epl-v10.html</url>
     </license>
   </licenses>
+  <scm>
+    <url>https://github.com/nilenso/honeysql-postgres</url>
+    <connection>scm:git:git://github.com/nilenso/honeysql-postgres.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/nilenso/honeysql-postgres.git</developerConnection>
+    <tag>0.4.112</tag>
+  </scm>
   <dependencies>
     <dependency>
       <groupId>org.clojure</groupId>
