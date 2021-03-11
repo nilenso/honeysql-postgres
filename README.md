@@ -10,7 +10,8 @@ This library aims to extend the features of honeysql to support postgres specifi
 This project follows the version scheme MAJOR.MINOR.COMMITS where MAJOR and MINOR provide some relative indication of the size of the change, but do not follow semantic versioning. In general, all changes endeavor to be non-breaking (by moving to new names rather than by breaking existing names). COMMITS is an ever-increasing counter of commits since the beginning of this repository.
 
 ### NPM
-From version `0.3.104` and onwards, new releases to `npmjs` will not be pushed. The last release available on npmjs is [0.2.6](https://www.npmjs.com/package/@honeysql/honeysql-postgres).
+From version `0.3.104` and onwards, new releases to [npmjs](https://www.npmjs.com) will not be pushed.
+The last available release on npmjs is [0.2.6](https://www.npmjs.com/package/@honeysql/honeysql-postgres).
 
 ### Known breaking change
 Implementation of `over` has been changed (from `0.2.2`) to accept alias as an option and define the aggregator-function within the over clause and not in the select clause, this allows the inclusion of multiple window-functions which was not possible in the previous implementation.
@@ -232,12 +233,12 @@ The `ilike` and `not-ilike` operators can be used to query data using a pattern 
 ### SQL functions
 
 The following are the SQL functions added in `honeysql-postgres`
-- not
+- `not`
 ```clojure
 (sql/format (sql/call :not nil))
 => ["NOT NULL"]
 ```
-- primary-key
+- `primary-key`
 ```clojure
 (sql/format (sql/call :primary-key))
 => ["PRIMARY KEY"]
@@ -245,7 +246,7 @@ The following are the SQL functions added in `honeysql-postgres`
 (sql/format (sql/call :primary-key :arg1 :arg2))
 => ["PRIMARY KEY(arg1, arg2)"]
 ```
-- unique
+- `unique`
 ```clojure
 (sql/format (sql/call :unique))
 => ["UNIQUE"]
@@ -253,7 +254,7 @@ The following are the SQL functions added in `honeysql-postgres`
 (sql/format (sql/call :unique :arg1 :arg2))
 => ["UNIQUE(arg1, arg2)"]
 ```
-- foreign-key
+- `foreign-key`
 ```clojure
 (sql/format (sql/call :foreign-key))
 => ["FOREIGN KEY"]
@@ -261,27 +262,27 @@ The following are the SQL functions added in `honeysql-postgres`
 (sql/format (sql/call :foreign-key :arg1 :arg2))
 => ["FOREIGN KEY(arg1, arg2)"]
 ```
-- references
+- `references`
 ```clojure
 (sql/format (sql/call :references :reftable :refcolumn))
 => ["REFERENCES reftable(refcolumn)"]
 ```
-- constraint
+- `constraint`
 ```clojure
 (sql/format (sql/call :constraint :name))
 => ["CONSTRAINT name"]
 ```
-- default
+- `default`
 ```clojure
 (sql/format (sql/call :default :value))
 => ["DEFAULT value"]
 ```
-- nextval
+- `nextval`
 ```clojure
 (sql/format (sql/call :nextval :value))
 => ["nextval('value')"]
 ```
-- check
+- `check`
 ```clojure
 (sql/format (sql/call :check [:= :a :b]))
 => ["CHECK(a = b)"]
