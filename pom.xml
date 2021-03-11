@@ -2,9 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <packaging>jar</packaging>
-  <groupId>honeysql-postgres</groupId>
+  <groupId>nilenso</groupId>
   <artifactId>honeysql-postgres</artifactId>
-  <version>0.2.6</version>
+  <version>0.3.104</version>
   <name>honeysql-postgres</name>
   <description>PostgreSQL extension for honeysql</description>
   <url>https://github.com/nilenso/honeysql-postgres</url>

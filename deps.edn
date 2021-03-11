@@ -12,7 +12,7 @@
                          :main-opts  ["-m" "seancorfield.readme"]}
            :deploy {:replace-deps {slipset/deps-deploy {:mvn/version "0.1.5"}}
                     :exec-fn deps-deploy.deps-deploy/deploy
-                    :exec-args {:installer :local :artifact "honeysql-postgres.jar"}}
+                    :exec-args {:installer :remote :artifact "honeysql-postgres.jar"}}
            :jar         {:replace-deps {seancorfield/depstar {:mvn/version "2.0.165"}}
                          :exec-fn      hf.depstar/jar
                          :exec-args    {}}}}

@@ -1,4 +1,4 @@
-# honeysql-postgres [![Actions Status](https://github.com/nilenso/honeysql-postgres/workflows/CI/badge.svg)](https://github.com/nilenso/honeysql-postgres/actions) [![Clojars Project](https://img.shields.io/clojars/v/nilenso/honeysql-postgres.svg)](https://clojars.org/nilenso/honeysql-postgres) [![NPM Version](https://img.shields.io/npm/v/@honeysql/honeysql-postgres.svg)](https://www.npmjs.org/package/@honeysql/honeysql-postgres) [![cljdoc badge](https://cljdoc.org/badge/nilenso/honeysql-postgres)](https://cljdoc.org/d/nilenso/honeysql-postgres/CURRENT)
+# honeysql-postgres [![Actions Status](https://github.com/nilenso/honeysql-postgres/workflows/CI/badge.svg)](https://github.com/nilenso/honeysql-postgres/actions) [![Clojars Project](https://img.shields.io/clojars/v/nilenso/honeysql-postgres.svg)](https://clojars.org/nilenso/honeysql-postgres) [![cljdoc badge](https://cljdoc.org/badge/nilenso/honeysql-postgres)](https://cljdoc.org/d/nilenso/honeysql-postgres/CURRENT)
 
 PostgreSQL extensions for the widely used [honeysql](https://github.com/jkk/honeysql).
 
@@ -12,9 +12,8 @@ The query creation and usage is exactly the same as honeysql.
 ## Index
 
 - [Usage](#usage)
-  - [Leiningen](#leiningen)
-  - [Maven](#maven)
   - [REPL](#REPL)
+  - [distinct on](#distinct-on)
   - [upsert](#upsert)
   - [insert into with alias](#insert-into-with-alias)
   - [over](#over)
@@ -30,25 +29,10 @@ The query creation and usage is exactly the same as honeysql.
 
 ## Usage
 
-### Leiningen
-```clj
-[nilenso/honeysql-postgres "0.2.6"]
-```
-### Maven
-```xml
-<dependency>
-  <groupId>nilenso</groupId>
-  <artifactId>honeysql-postgres</artifactId>
-  <version>0.2.6</version>
-</dependency>
-```
 ### REPL
 ```clojure
-; Note that `honeysql-postgres.format` and `honeysql-postgres.helpers`
-; must be required into the project for the extended features to work.
 (require '[honeysql.core :as sql]
          '[honeysql.helpers :refer :all :as sqlh]
-         '[honeysql-postgres.format :refer :all]
          '[honeysql-postgres.helpers :as psqlh])
 ```
 
@@ -197,7 +181,7 @@ The `ilike` and `not-ilike` operators can be used to query data using a pattern 
 
 ### filter
 
-``` clj
+``` clojure
 (-> (select (sql/call :count :*))
     (filter [(sql/call :count :*) (where [:< :i 5]) :foo]
             [(sql/call :count :*) (where [:between :i 3 10]) :bar])
