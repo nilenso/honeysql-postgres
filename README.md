@@ -40,11 +40,8 @@ This library aims to extend the features of honeysql to support postgres specifi
 ```
 ### REPL
 ```clojure
-; Note that `honeysql-postgres.format` and `honeysql-postgres.helpers`
-; must be required into the project for the extended features to work.
 (require '[honeysql.core :as sql]
          '[honeysql.helpers :refer :all :as sqlh]
-         '[honeysql-postgres.format :refer :all]
          '[honeysql-postgres.helpers :as psqlh])
 ```
 
