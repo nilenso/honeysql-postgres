@@ -4,10 +4,16 @@ PostgreSQL extensions for the widely used [honeysql](https://github.com/jkk/hone
 
 This library aims to extend the features of honeysql to support postgres specific SQL clauses and some basic SQL DDL in addition to the ones supported by the parent library. This keeps honeysql clean and single-purpose, any vendor-specific additions can simply be separate libraries that work on top.
 
-## Breaking Change
-Implementation of `over` has been changed (from 0.2.2) to accept alias as an option and define the aggregator-function within the over clause and not in the select clause, this allows the inclusion of multiple window-function which was not possible in the previous implementation.
+## Release
 
-The query creation and usage is exactly the same as honeysql.
+### Build
+This project follows the version scheme MAJOR.MINOR.COMMITS where MAJOR and MINOR provide some relative indication of the size of the change, but do not follow semantic versioning. In general, all changes endeavor to be non-breaking (by moving to new names rather than by breaking existing names). COMMITS is an ever-increasing counter of commits since the beginning of this repository.
+
+### NPM
+From version `0.3.104` and onwards, new releases to `npmjs` will not be pushed. The last release available on npmjs is [0.2.6](https://www.npmjs.com/package/@honeysql/honeysql-postgres).
+
+### Known breaking change
+Implementation of `over` has been changed (from `0.2.2`) to accept alias as an option and define the aggregator-function within the over clause and not in the select clause, this allows the inclusion of multiple window-functions which was not possible in the previous implementation.
 
 ## Index
 
