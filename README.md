@@ -36,6 +36,16 @@ The query creation and usage is exactly the same as honeysql.
          '[honeysql-postgres.helpers :as psqlh])
 ```
 
+### distinct-on
+`select` can be written with a `distinct on` clause
+``` clojure
+(-> (select :column-1 :column-2 :column-3)
+    (from :table-name)
+    (modifiers :distinct-on :column-1 :column-2)
+    (sql/format))
+=> ["SELECT DISTINCT ON(column_1, column_2) column_1, column_2, column_3 FROM table_name"]
+```
+
 ### upsert
 `upsert` can be written either way. You can make use of `do-update-set!` over `do-update-set`, if you want to modify the some column values in case of conflicts.
 ```clojure
@@ -252,6 +262,6 @@ The following are the SQL functions added in `honeysql-postgres`
 
 ## License
 
-Copyright © 2020 Nilenso
+Copyright © 2021 Nilenso
 
 Distributed under the Eclipse Public License, the same as Clojure.
