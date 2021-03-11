@@ -12,6 +12,7 @@ This library aims to extend the features of honeysql to support postgres specifi
   - [Maven](#maven)
   - [REPL](#REPL)
   - [Breaking Change](#breaking-change)
+  - [distinct on](#distinct-on)
   - [upsert](#upsert)
   - [insert into with alias](#insert-into-with-alias)
   - [over](#over)
@@ -49,6 +50,16 @@ This library aims to extend the features of honeysql to support postgres specifi
 Implementation of `over` has been changed (from 0.2.2) to accept alias as an option and define the aggregator-function within the over clause and not in the select clause, this allows the inclusion of multiple window-function which was not possible in the previous implementation.
 
 The query creation and usage is exactly the same as honeysql.
+
+### distinct-on
+`select` can be written with a `distinct on` clause
+``` clj
+(-> (select :column-1 :column-2 :column-3)
+    (from :table-name)
+    (modifiers :distinct-on :column-1 :column-2)
+    (sql/format))
+=> ["SELECT DISTINCT ON(column_1, column_2) column_1, column_2, column_3 FROM table_name"]
+```
 
 ### upsert
 `upsert` can be written either way. You can make use of `do-update-set!` over `do-update-set`, if you want to modify the some column values in case of conflicts.
