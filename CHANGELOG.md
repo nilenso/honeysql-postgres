@@ -1,3 +1,12 @@
+## 0.3.104
+- Update docs to add syntax for setting multiple [k, v] pairs `ON CONFLICT`
+- Add support for `CREATE / DROP EXTENSION`
+- Add support for `DISTINCT ON`
+- Include `honeysql-posgres.format` directly into `honeysql-postgres.helpers` to avoid leaking the `require` to the consumer
+- Stop using lein and shift to deps exclusively
+- Add CI and release/publish workflow
+- Add support for testing all examples in the README as part of CI
+
 ## 0.2.6
 - Add ILIKE, NOT ILIKE
 - ADD EXCEPT and EXCEPT ALL

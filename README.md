@@ -1,9 +1,8 @@
-# honeysql-postgres [![Actions Status](https://github.com/nilenso/honeysql-postgres/workflows/CI/badge.svg)](https://github.com/nilenso/honeysql-postgres/actions) [![Clojars Project](https://img.shields.io/clojars/v/nilenso/honeysql-postgres.svg)](https://clojars.org/nilenso/honeysql-postgres) [![NPM Version](https://img.shields.io/npm/v/@honeysql/honeysql-postgres.svg)](https://www.npmjs.org/package/@honeysql/honeysql-postgres) [![cljdoc badge](https://cljdoc.org/badge/nilenso/honeysql-postgres)](https://cljdoc.org/d/nilenso/honeysql-postgres/CURRENT)
+# honeysql-postgres [![Actions Status](https://github.com/nilenso/honeysql-postgres/workflows/CI/badge.svg)](https://github.com/nilenso/honeysql-postgres/actions) [![Clojars Project](https://img.shields.io/clojars/v/nilenso/honeysql-postgres.svg)](https://clojars.org/nilenso/honeysql-postgres) [![cljdoc badge](https://cljdoc.org/badge/nilenso/honeysql-postgres)](https://cljdoc.org/d/nilenso/honeysql-postgres/CURRENT)
 
 PostgreSQL extensions for the widely used [honeysql](https://github.com/jkk/honeysql).
 
 This library aims to extend the features of honeysql to support postgres specific SQL clauses and some basic SQL DDL in addition to the ones supported by the parent library. This keeps honeysql clean and single-purpose, any vendor-specific additions can simply be separate libraries that work on top.
-
 
 ## Index
 
@@ -27,18 +26,6 @@ This library aims to extend the features of honeysql to support postgres specifi
 
 ## Usage
 
-### Leiningen
-```clj
-[nilenso/honeysql-postgres "0.2.6"]
-```
-### Maven
-```xml
-<dependency>
-  <groupId>nilenso</groupId>
-  <artifactId>honeysql-postgres</artifactId>
-  <version>0.2.6</version>
-</dependency>
-```
 ### REPL
 ```clojure
 (require '[honeysql.core :as sql]
