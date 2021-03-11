@@ -7,14 +7,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      java: '14'
     steps:
       - uses: actions/checkout@v2
       - name: Setup Java
         uses: actions/setup-java@v1
         with:
-          java-version: ${{ java }}
+          java-version: '14'
       - name: Setup Clojure
         uses: DeLaGuardo/setup-clojure@master
         with:

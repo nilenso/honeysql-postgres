@@ -1,4 +1,4 @@
-# honeysql-postgres [![Actions Status](https://github.com/nilenso/honeysql-postgres/workflows/CI/badge.svg)](https://github.com/nilenso/honeysql-postgres/actions) [![Clojars Project](https://img.shields.io/clojars/v/nilenso/honeysql-postgres.svg)](https://clojars.org/nilenso/honeysql-postgres) [![NPM Version](https://img.shields.io/npm/v/@honeysql/honeysql-postgres.svg)](https://www.npmjs.org/package/@honeysql/honeysql-postgres) [![cljdoc badge](https://cljdoc.org/badge/nilenso/honeysql-postgres)](https://cljdoc.org/d/nilenso/honeysql-postgres/CURRENT)
+# honeysql-postgres [![Actions Status](https://github.com/nilenso/honeysql-postgres/workflows/CI/badge.svg)](https://github.com/nilenso/honeysql-postgres/actions) [![Clojars Project](https://img.shields.io/clojars/v/nilenso/honeysql-postgres.svg)](https://clojars.org/nilenso/honeysql-postgres) [![cljdoc badge](https://cljdoc.org/badge/nilenso/honeysql-postgres)](https://cljdoc.org/d/nilenso/honeysql-postgres/CURRENT)
 
 PostgreSQL extensions for the widely used [honeysql](https://github.com/jkk/honeysql).
 
@@ -15,6 +15,7 @@ The query creation and usage is exactly the same as honeysql.
   - [Leiningen](#leiningen)
   - [Maven](#maven)
   - [REPL](#REPL)
+  - [distinct on](#distinct-on)
   - [upsert](#upsert)
   - [insert into with alias](#insert-into-with-alias)
   - [over](#over)
@@ -30,26 +31,21 @@ The query creation and usage is exactly the same as honeysql.
 
 ## Usage
 
-### Leiningen
-```clj
-[nilenso/honeysql-postgres "0.2.6"]
-```
-### Maven
-```xml
-<dependency>
-  <groupId>nilenso</groupId>
-  <artifactId>honeysql-postgres</artifactId>
-  <version>0.2.6</version>
-</dependency>
-```
 ### REPL
 ```clojure
-; Note that `honeysql-postgres.format` and `honeysql-postgres.helpers`
-; must be required into the project for the extended features to work.
 (require '[honeysql.core :as sql]
          '[honeysql.helpers :refer :all :as sqlh]
-         '[honeysql-postgres.format :refer :all]
          '[honeysql-postgres.helpers :as psqlh])
+```
+
+### distinct-on
+`select` can be written with a `distinct on` clause
+``` clj
+(-> (select :column-1 :column-2 :column-3)
+    (from :table-name)
+    (modifiers :distinct-on :column-1 :column-2)
+    (sql/format))
+=> ["SELECT DISTINCT ON(column_1, column_2) column_1, column_2, column_3 FROM table_name"]
 ```
 
 ### upsert
@@ -268,6 +264,6 @@ The following are the SQL functions added in `honeysql-postgres`
 
 ## License
 
-Copyright © 2020 Nilenso
+Copyright © 2021 Nilenso
 
 Distributed under the Eclipse Public License, the same as Clojure.
