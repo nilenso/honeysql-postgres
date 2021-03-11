@@ -1,3 +1,8 @@
+## 0.4.112
+- Upgrade the `honeysql` dependency from `0.9.5` to `1.0.461`
+- Support `FILTER` + `WITHIN GROUP` for aggregate expressions
+- Comma separate the column names provided to `RETURNING`
+
 ## 0.3.104
 - Update docs to add syntax for setting multiple [k, v] pairs `ON CONFLICT`
 - Add support for `CREATE / DROP EXTENSION`
