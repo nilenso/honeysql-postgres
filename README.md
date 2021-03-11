@@ -4,13 +4,15 @@ PostgreSQL extensions for the widely used [honeysql](https://github.com/jkk/hone
 
 This library aims to extend the features of honeysql to support postgres specific SQL clauses and some basic SQL DDL in addition to the ones supported by the parent library. This keeps honeysql clean and single-purpose, any vendor-specific additions can simply be separate libraries that work on top.
 
+## Breaking Change
+Implementation of `over` has been changed (from 0.2.2) to accept alias as an option and define the aggregator-function within the over clause and not in the select clause, this allows the inclusion of multiple window-function which was not possible in the previous implementation.
+
+The query creation and usage is exactly the same as honeysql.
+
 ## Index
 
 - [Usage](#usage)
-  - [Leiningen](#leiningen)
-  - [Maven](#maven)
   - [REPL](#REPL)
-  - [Breaking Change](#breaking-change)
   - [distinct on](#distinct-on)
   - [upsert](#upsert)
   - [insert into with alias](#insert-into-with-alias)
@@ -21,6 +23,7 @@ This library aims to extend the features of honeysql to support postgres specifi
   - [alter table](#alter-table)
   - [pattern matching](#pattern-matching)
   - [except](#except)
+  - [filter](#filter)
   - [SQL functions](#sql-functions)
 - [License](#license)
 
@@ -33,14 +36,9 @@ This library aims to extend the features of honeysql to support postgres specifi
          '[honeysql-postgres.helpers :as psqlh])
 ```
 
-### Breaking Change
-Implementation of `over` has been changed (from 0.2.2) to accept alias as an option and define the aggregator-function within the over clause and not in the select clause, this allows the inclusion of multiple window-function which was not possible in the previous implementation.
-
-The query creation and usage is exactly the same as honeysql.
-
 ### distinct-on
 `select` can be written with a `distinct on` clause
-``` clj
+``` clojure
 (-> (select :column-1 :column-2 :column-3)
     (from :table-name)
     (modifiers :distinct-on :column-1 :column-2)
@@ -180,6 +178,7 @@ The `ilike` and `not-ilike` operators can be used to query data using a pattern 
     sql/format)
 => ["SELECT name FROM products WHERE name NOT ILIKE ?" "%name%"]
 ```
+
 ### except
 ```clojure
 (sql/format
@@ -189,6 +188,17 @@ The `ilike` and `not-ilike` operators can be used to query data using a pattern 
 => ["SELECT ip EXCEPT SELECT ip FROM ip_location"]
 ```
 `except-all` works the same way as `except`.
+
+### filter
+
+``` clojure
+(-> (select (sql/call :count :*))
+    (filter [(sql/call :count :*) (where [:< :i 5]) :foo]
+            [(sql/call :count :*) (where [:between :i 3 10]) :bar])
+    (from (sql/raw "generate_series(1,10) AS s(i)"))
+    (sql/format))
+=> ["SELECT count(*) , count(*) FILTER (WHERE i < ?) AS foo, count(*) FILTER (WHERE i BETWEEN ? AND ?) AS bar FROM generate_series(1,10) AS s(i)" 5 3 10]
+```
 
 ### SQL functions
 The following are the SQL functions added in `honeysql-postgres`
@@ -249,8 +259,9 @@ The following are the SQL functions added in `honeysql-postgres`
 (sql/format (sql/call :check [:= :a :b] [:= :c :d]))
 ["CHECK(a = b AND c = d)"]
 ```
+
 ## License
 
-Copyright © 2020 Nilenso
+Copyright © 2021 Nilenso
 
 Distributed under the Eclipse Public License, the same as Clojure.

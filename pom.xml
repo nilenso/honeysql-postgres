@@ -23,7 +23,7 @@
     <dependency>
       <groupId>honeysql</groupId>
       <artifactId>honeysql</artifactId>
-      <version>0.9.5</version>
+      <version>1.0.461</version>
       <exclusions>
         <exclusion>
           <groupId>org.clojure</groupId>

@@ -1,4 +1,4 @@
-{:deps    {honeysql/honeysql {:mvn/version "0.9.5" :exclusions [org.clojure/clojurescript]}}
+{:deps    {honeysql/honeysql {:mvn/version "1.0.461" :exclusions [org.clojure/clojurescript]}}
  :paths   ["src"]
  :aliases {:test        {:extra-paths ["test"]}
            :runner      {:extra-deps {com.cognitect/test-runner

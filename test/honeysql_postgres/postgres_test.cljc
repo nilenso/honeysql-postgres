@@ -1,12 +1,12 @@
 (ns honeysql-postgres.postgres-test
-  (:refer-clojure :exclude [update partition-by])
+  (:refer-clojure :exclude [update partition-by filter])
   (:require [honeysql-postgres.helpers :as sqlph :refer [upsert on-conflict do-nothing on-conflict-constraint
                                                          returning do-update-set do-update-set!
                                                          alter-table rename-column drop-column
                                                          add-column partition-by insert-into-as
                                                          create-table rename-table drop-table
                                                          window create-view over with-columns
-                                                         create-extension drop-extension]]
+                                                         create-extension drop-extension filter]]
             [honeysql.helpers :as sqlh :refer [insert-into values where select columns
                                                from order-by update sset query-values
                                                modifiers]]
@@ -65,6 +65,17 @@
                          :where         [:<> :phone nil]
                          :do-update-set {:fields [:phone :name]
                                          :where  [:= :user.active false]}}}))))
+
+(deftest filter-test
+  (is (= ["count(*) FILTER (WHERE NOT i BETWEEN ? AND ?) AS a" 3 5]
+         (sql/format (filter [(sql/call :count :*) (where [:not [:between :i 3 5]]) :a]))))
+
+  (is (= ["SELECT count(*) , count(*) FILTER (WHERE s.i < ?) AS foo, count(*) FILTER (WHERE s.i BETWEEN ? AND ?) AS bar FROM generate_series(1,10) AS s(i)" 5 3 10]
+         (-> (select (sql/call :count :*))
+             (filter [(sql/call :count :*) (where [:< :s.i 5]) :foo]
+                     [(sql/call :count :*) (where [:between :s.i 3 10]) :bar])
+             (from (sql/raw "generate_series(1,10) AS s(i)"))
+             (sql/format)))))
 
 (deftest returning-test
   (testing "returning clause in sql generation for postgresql"
