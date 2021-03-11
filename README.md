@@ -31,6 +31,7 @@ The query creation and usage is exactly the same as honeysql.
 ## Usage
 
 ### REPL
+
 ```clojure
 (require '[honeysql.core :as sql]
          '[honeysql.helpers :refer :all :as sqlh]
@@ -38,6 +39,7 @@ The query creation and usage is exactly the same as honeysql.
 ```
 
 ### distinct-on
+
 `select` can be written with a `distinct on` clause
 ``` clojure
 (-> (select :column-1 :column-2 :column-3)
@@ -48,6 +50,7 @@ The query creation and usage is exactly the same as honeysql.
 ```
 
 ### upsert
+
 `upsert` can be written either way. You can make use of `do-update-set!` over `do-update-set`, if you want to modify the some column values in case of conflicts.
 ```clojure
 (-> (insert-into :distributors)
@@ -70,6 +73,7 @@ The query creation and usage is exactly the same as honeysql.
 ```
 
 ### insert into with alias
+
 `insert-into-as` can be used to write insert statements with table name aliased.
 ```clojure
 (-> (psqlh/insert-into-as :distributors :d)
@@ -85,6 +89,7 @@ The query creation and usage is exactly the same as honeysql.
 ```
 
 ### over
+
 You can make use of `over` to write window functions where it takes in vectors with aggregator functions and window functions along with optional alias like `(over [aggregator-function window-function alias])`, the can be coupled with the `window` clause to write window-function functions with alias that is later defines the window-function, like `(-> (over [aggregator-function :w]) (window :w window-function))`.
 ```clojure
 (-> (select :id)
@@ -109,6 +114,7 @@ You can make use of `over` to write window functions where it takes in vectors w
 ```
 
 ### create table
+
 `create-table` and `with-columns` can be used to create tables along with the SQL functions, where `create-table` takes a table name as argument and `with-columns` takes a vector of vectors as argument, where the vectors describe the column properties as `[:column-name :datatype :constraints ... ]`.
 ```clojure
 (-> (psqlh/create-table :films)
@@ -123,6 +129,7 @@ You can make use of `over` to write window functions where it takes in vectors w
 ```
 
 ### drop table
+
 `drop-table` is used to drop tables
 ```clojure
 (sql/format (psqlh/drop-table :cities :towns :vilages))
@@ -130,6 +137,7 @@ You can make use of `over` to write window functions where it takes in vectors w
 ```
 
 ### alter table
+
 use `alter-table` along with `add-column` & `drop-column` to modify table level details
 ```clojure
 (-> (psqlh/alter-table :employees)
@@ -144,6 +152,7 @@ use `alter-table` along with `add-column` & `drop-column` to modify table level 
 ```
 
 ### create-extension
+
 `create-extension` can be used to create extensions with a given keyword.
 ```clojure
 (-> (psqlh/create-extension :uuid-ossp :if-not-exists? true)
@@ -162,6 +171,7 @@ use `alter-table` along with `add-column` & `drop-column` to modify table level 
 ```
 
 ### pattern matching
+
 The `ilike` and `not-ilike` operators can be used to query data using a pattern matching technique.
 - like
 ```clojure
@@ -214,6 +224,7 @@ The `ilike` and `not-ilike` operators can be used to query data using a pattern 
 ```
 
 ### SQL functions
+
 The following are the SQL functions added in `honeysql-postgres`
 - not
 ```clojure
