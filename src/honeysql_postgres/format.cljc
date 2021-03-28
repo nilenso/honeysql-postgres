@@ -304,5 +304,5 @@
 (defmethod format-clause :case-when-else
   [[_ pred-thens] _]
   (let [else (last pred-thens)]
-    (format-branches (concat (format-case-preds (drop-last pred-thens))
+    (format-branches (concat (vec (format-case-preds (drop-last pred-thens)))
                              [(str "ELSE " (sqlf/to-sql else))]))))

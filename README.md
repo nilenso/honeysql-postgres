@@ -207,6 +207,36 @@ The `ilike` and `not-ilike` operators can be used to query data using a pattern 
 => ["SELECT name FROM products WHERE name NOT ILIKE ?" "%name%"]
 ```
 
+### case when then else
+
+The case condition expression can be used to `select` or `where` clauses.
+- case-when
+```clojure
+(-> (select (case-when [:= :name "Bob"] "Mr. B."
+                       [:= :name "Alisa"] "Strange Lady"))
+    (from :guests)
+    sql/format)
+=> ["SELECT  FROM guests CASE WHEN name = ? THEN ? WHEN name = ? THEN ? END"
+    "Bob"
+    "Mr. B."
+    "Alisa"
+    "Strange Lady"]
+```
+- case-when-else
+```clojure
+(-> (select (case-when-else [:= :name "Bob"] "Mr. B."
+                            [:= :name "Alisa"] "Strange Lady"
+                            "Unknown"))
+    (from :guests)
+    sql/format)
+=> ["SELECT  FROM guests CASE WHEN name = ? THEN ? WHEN name = ? THEN ? ELSE ? END"
+    "Bob"
+    "Mr. B."
+    "Alisa"
+    "Strange Lady"
+    "Unknown"]
+```
+
 ### except
 
 ```clojure
@@ -239,6 +269,35 @@ The `ilike` and `not-ilike` operators can be used to query data using a pattern 
 => ["SELECT count(*) , percentile_disc(ARRAY[?, ?, ?]) WITHIN GROUP (ORDER BY s.i) AS alias FROM generate_series(1,10) AS s(i)"
     0.25 0.50 0.75]
 ```
+
+### join lateral
+
+Sometimes we need some pivot functionality to solve some analytical tasks or just improve the performance of our queries. In PostgreSQL we have `JOIN LATERAL` clauses to do that.
+- join-lateral
+```clojure
+(-> (h/select [:%count.* :total-n]
+              [:%count.gr-coef :good-n]
+              [:%count.br-coef :bad-n]
+              [:%avg.gr-length :good-length]
+              [:%avg.gr-coef :good-coef])
+    (h/from [:stats-open-results :r])
+    (h/join [:stats-positions :p] [:= :p.id :r.position-id])
+    (e/join-lateral [(h/select
+                      [(e/case-when [:>= :strength-coef (sql/inline 3)]
+                                    :best-length) :gr-length]
+                      [(e/case-when [:>= :strength-coef (sql/inline 3)]
+                                    :strength-coef) :gr-coef]
+                      [(e/case-when [:< :strength-coef (sql/inline 3)]
+                                    :strength-coef) :br-coef])
+                      :z0] :true)
+    (h/where [:= :p.direction "UP"])
+    (h/group :r.class-id)
+    sql/format)
+=> ["SELECT count(*) AS total_n, count(gr_coef) AS good_n, count(br_coef) AS bad_n, avg(gr_length) AS good_length, avg(gr_coef) AS good_coef FROM stats_open_results r INNER JOIN stats_positions p ON p.id = r.position_id INNER JOIN LATERAL (SELECT (CASE WHEN strength_coef >= 3 THEN best_length END) AS gr_length, (CASE WHEN strength_coef >= 3 THEN strength_coef END) AS gr_coef, (CASE WHEN strength_coef < 3 THEN strength_coef END) AS br_coef) z0 ON true WHERE (p.direction = ?) GROUP BY r.class_id"
+    "UP"]
+```
+- left-join-lateral
+The same functionality but for the case when the existing of a pivot result for each row is not mandatory.
 
 ### SQL functions
 
