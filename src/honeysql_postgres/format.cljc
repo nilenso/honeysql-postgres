@@ -19,6 +19,8 @@
    :insert-into-as 60
    :with-columns 70
    :constraints 75
+   :join-lateral 153
+   :left-join-lateral 154
    :partition-by 165
    :window 195
    :upsert 225
@@ -297,3 +299,40 @@
        (-> extension-name
            util/get-first
            sqlf/to-sql)))
+
+(defn- format-join [type table pred]
+  (str (when type
+         (str (string/upper-case (name type)) " "))
+       "JOIN LATERAL " (sqlf/to-sql table)
+       (when (some? pred)
+         (str " ON " (sqlf/format-predicate* pred)))))
+
+(defn- make-join [type join-groups]
+  (sqlf/space-join (map #(apply format-join type %)
+                        (partition 2 join-groups))))
+
+(defmethod format-clause :join-lateral [[_ join-groups] _]
+  (make-join :inner join-groups))
+
+(defmethod format-clause :left-join-lateral [[_ join-groups] _]
+  (make-join :left join-groups))
+
+(defn- format-case-preds [pred-thens]
+  (map (fn [[pred then]]
+         (str "WHEN " (sqlf/format-predicate* pred)
+              " THEN " (sqlf/to-sql then)))
+       (partition 2 pred-thens)))
+
+(defn- format-branches
+  [branches]
+  (str "CASE " (sqlf/space-join branches) " END"))
+
+(defmethod format-clause :case-when
+  [[_ pred-thens] _]
+  (format-branches (format-case-preds pred-thens)))
+
+(defmethod format-clause :case-when-else
+  [[_ pred-thens] _]
+  (let [else (last pred-thens)]
+    (format-branches (concat (vec (format-case-preds (drop-last pred-thens)))
+                             [(str "ELSE " (sqlf/to-sql else))]))))

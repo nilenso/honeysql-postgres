@@ -8,6 +8,8 @@
              :refer
              [add-column
               alter-table
+              case-when
+              case-when-else
               constraints
               create-extension
               create-table
@@ -20,6 +22,8 @@
               drop-table
               filter
               insert-into-as
+              join-lateral
+              left-join-lateral
               on-conflict
               on-conflict-constraint
               over
@@ -372,3 +376,36 @@
            (-> (drop-extension :uuid-ossp)
                (sql/format :allow-dashed-names? true
                            :quoting :ansi))))))
+
+(deftest case-when-test
+  (is (= ["CASE WHEN x = 1 THEN x WHEN x > 1 THEN y END"]
+         (-> (case-when [:= :x (sql/inline 1)] :x
+                        [:> :x (sql/inline 1)] :y)
+             sql/format))))
+
+(deftest case-when-else-test
+  (is (= ["CASE WHEN x = 1 THEN x WHEN x > 1 THEN y ELSE z END"]
+         (-> (case-when-else [:= :x (sql/inline 1)] :x
+                             [:> :x (sql/inline 1)] :y
+                             :z)
+             sql/format))))
+
+(deftest join-lateral-test
+  (is (= ["SELECT count(x3), count(x0) FROM x_values INNER JOIN LATERAL (SELECT (CASE WHEN x > 3 THEN x END) AS x3, (CASE WHEN x > 0 THEN x END) AS x0) z ON true"]
+         (-> (select :%count.x3
+                     :%count.x0)
+             (from :x-values)
+             (join-lateral [(select
+                             [(case-when [:> :x (sql/inline 3)] :x) :x3]
+                             [(case-when [:> :x (sql/inline 0)] :x) :x0]) :z] :true)
+             sql/format))))
+
+(deftest left-join-lateral-test
+  (is (= ["SELECT count(x3), count(x0) FROM x_values LEFT JOIN LATERAL (SELECT (CASE WHEN x > 3 THEN x END) AS x3, (CASE WHEN x > 0 THEN x END) AS x0) z ON true"]
+         (-> (select :%count.x3
+                     :%count.x0)
+             (from :x-values)
+             (left-join-lateral [(select
+                                  [(case-when [:> :x (sql/inline 3)] :x) :x3]
+                                  [(case-when [:> :x (sql/inline 0)] :x) :x0]) :z] :true)
+             sql/format))))

@@ -83,3 +83,19 @@
 
 (defhelper drop-extension [m extension-name]
   (assoc m :drop-extension (sqlh/collify extension-name)))
+
+(defhelper join-lateral
+  [m clauses]
+  (assoc m :join-lateral clauses))
+
+(defhelper left-join-lateral
+  [m clauses]
+  (assoc m :left-join-lateral clauses))
+
+(defhelper case-when
+  [m clauses]
+  (assoc m :case-when clauses))
+
+(defhelper case-when-else
+  [m clauses]
+  (assoc m :case-when-else clauses))
