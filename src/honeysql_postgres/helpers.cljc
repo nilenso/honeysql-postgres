@@ -42,6 +42,9 @@
 (defhelper with-columns [m args]
   (assoc m :with-columns args))
 
+(defhelper constraints [m args]
+  (assoc m :constraints args))
+
 (defhelper drop-table [m tablenames]
   (assoc m :drop-table (sqlh/collify tablenames)))
 
