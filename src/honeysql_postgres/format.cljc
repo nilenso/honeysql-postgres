@@ -17,6 +17,8 @@
    :within-group 55
    :over 55
    :insert-into-as 60
+   :with-columns 70
+   :constraints 75
    :join-lateral 153
    :left-join-lateral 154
    :partition-by 165
@@ -163,11 +165,39 @@
            util/get-first
            sqlf/to-sql)))
 
-(defmethod format-clause :with-columns [[_ columns] _]
-  (sqlf/paren-wrap (->> columns
-                        util/get-first
-                        (map #(sqlf/space-join (map sqlf/to-sql %)))
-                        sqlf/comma-join)))
+(def ^:private constraints-format-map
+  {:primary-key "PRIMARY KEY"
+   :unique      "UNIQUE"})
+
+(defn- format-constraint-clause
+  [[constraint-type constraint-args]]
+  (when (contains? constraints-format-map constraint-type)
+    (str (get constraints-format-map constraint-type)
+         (sqlf/paren-wrap (->> constraint-args
+                               (map sqlf/to-sql)
+                               sqlf/comma-join)))))
+
+(defn- format-columns-clause
+  [columns]
+  (->> columns
+       util/get-first
+       (map #(sqlf/space-join (map sqlf/to-sql %)))
+       sqlf/comma-join))
+
+(defmethod format-clause :with-columns [[_ columns] complete-sql-map]
+  (when-not (seq (:constraints complete-sql-map))
+    (sqlf/paren-wrap (format-columns-clause columns))))
+
+(defmethod format-clause :constraints [[_ [constraints]] complete-sql-map]
+  (let [columns (:with-columns complete-sql-map)
+        constraints (filter (fn [[constraint-type _]]
+                              (contains? constraints-format-map constraint-type)) constraints)]
+    (sqlf/paren-wrap
+     (str (when (seq columns)
+            (format-columns-clause columns))
+          (when (seq constraints)
+            (str ", "
+                 (sqlf/comma-join (map format-constraint-clause constraints))))))))
 
 (defmethod format-clause :drop-table [[_ params] _]
   (let [[if-exists & others] params

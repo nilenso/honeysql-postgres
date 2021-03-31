@@ -10,6 +10,7 @@
               alter-table
               case-when
               case-when-else
+              constraints
               create-extension
               create-table
               create-view
@@ -195,6 +196,43 @@
                               [:price :numeric (sql/call :check [:> :price 0])]
                               [:discounted_price :numeric]
                               [(sql/call :check [:> :discounted_price 0] [:> :price :discounted_price])]])
+               sql/format)))))
+
+(deftest constraints-test
+  (testing "creating table with unique constraint on multiple columns"
+    (is (= ["CREATE TABLE products  (product_no integer, name text, product_sku integer, UNIQUE(product_no, product_sku))"]
+           (-> (create-table :products)
+               (with-columns [[:product_no :integer]
+                              [:name :text]
+                              [:product_sku :integer]])
+               (constraints [[:unique [:product_no :product_sku]]])
+               sql/format))))
+  (testing "creating table with primary key constraint on single column"
+    (is (= ["CREATE TABLE products  (product_no integer, name text, product_sku integer, PRIMARY KEY(product_no))"]
+           (-> (create-table :products)
+               (with-columns [[:product_no :integer]
+                              [:name :text]
+                              [:product_sku :integer]])
+               (constraints [[:primary-key [:product_no]]])
+               sql/format))))
+  (testing "creating table with primary key and unique constraints"
+    (is (= ["CREATE TABLE products  (product_no integer, name text, product_sku integer, UNIQUE(product_no, product_sku), PRIMARY KEY(product_no))"]
+           (-> (create-table :products)
+               (with-columns [[:product_no :integer]
+                              [:name :text]
+                              [:product_sku :integer]])
+               (constraints [[:unique [:product_no :product_sku]]
+                             [:primary-key [:product_no]]])
+               sql/format))))
+  (testing "creating table with invalid/unsupported constraints does not produce incorrect SQL statement"
+    (is (= ["CREATE TABLE products  (product_no integer, name text, product_sku integer, PRIMARY KEY(product_no))"]
+           (-> (create-table :products)
+               (with-columns [[:product_no :integer]
+                              [:name :text]
+                              [:product_sku :integer]])
+               (constraints [[:unique-constraint [:product_no]] ;; incorrect constraint-type
+                             [:primary-key [:product_no]]
+                             [:not-null [:name]]])              ;; unsupported constraint-type
                sql/format)))))
 
 (deftest over-test

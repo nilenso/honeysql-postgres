@@ -314,6 +314,13 @@ The following are the SQL functions added in `honeysql-postgres`
 
 (sql/format (sql/call :primary-key :arg1 :arg2))
 => ["PRIMARY KEY(arg1, arg2)"]
+
+(-> (psqlh/create-table :table)
+    (psqlh/with-columns [[:column_1 :integer]
+                         [:column_2 :text]])
+    (psqlh/constraints  [[:primary-key [:column_1]]])
+    sql/format)
+=> ["CREATE TABLE table  (column_1 integer, column_2 text, PRIMARY KEY(column_1))"]
 ```
 - `unique`
 ```clojure
@@ -322,6 +329,13 @@ The following are the SQL functions added in `honeysql-postgres`
 
 (sql/format (sql/call :unique :arg1 :arg2))
 => ["UNIQUE(arg1, arg2)"]
+
+(-> (psqlh/create-table :table)
+    (psqlh/with-columns [[:column_1 :integer]
+                         [:column_2 :text]])
+    (psqlh/constraints  [[:unique [:column_2]]])
+    sql/format)
+=> ["CREATE TABLE table  (column_1 integer, column_2 text, UNIQUE(column_2))"]
 ```
 - `foreign-key`
 ```clojure
