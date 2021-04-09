@@ -340,34 +340,34 @@
                            :quoting :ansi))))))
 
 (deftest case-when-test
-  (is (= ["CASE WHEN x = 1 THEN x WHEN x > 1 THEN y END"]
-         (-> (case-when [:= :x (sql/inline 1)] :x
-                        [:> :x (sql/inline 1)] :y)
+  (is (= ["CASE WHEN x = ? THEN x WHEN x > ? THEN y END" 1 2]
+         (-> (case-when [:= :x 1] :x
+                        [:> :x 2] :y)
              sql/format))))
 
 (deftest case-when-else-test
-  (is (= ["CASE WHEN x = 1 THEN x WHEN x > 1 THEN y ELSE z END"]
-         (-> (case-when-else [:= :x (sql/inline 1)] :x
-                             [:> :x (sql/inline 1)] :y
-                             :z)
+  (is (= ["CASE WHEN x = ? THEN x WHEN x > ? THEN y ELSE ? END" 1 2 5]
+         (-> (case-when-else [:= :x 1] :x
+                             [:> :x 2] :y
+                             5)
              sql/format))))
 
 (deftest join-lateral-test
-  (is (= ["SELECT count(x3), count(x0) FROM x_values INNER JOIN LATERAL (SELECT (CASE WHEN x > 3 THEN x END) AS x3, (CASE WHEN x > 0 THEN x END) AS x0) z ON true"]
+  (is (= ["SELECT count(x3), count(x0) FROM x_values INNER JOIN LATERAL (SELECT (CASE WHEN x > ? THEN x END) AS x3, (CASE WHEN x > ? THEN x END) AS x0) z ON true" 3 0]
          (-> (select :%count.x3
                      :%count.x0)
              (from :x-values)
              (join-lateral [(select
-                             [(case-when [:> :x (sql/inline 3)] :x) :x3]
-                             [(case-when [:> :x (sql/inline 0)] :x) :x0]) :z] :true)
+                             [(case-when [:> :x 3] :x) :x3]
+                             [(case-when [:> :x 0] :x) :x0]) :z] :true)
              sql/format))))
 
 (deftest left-join-lateral-test
-  (is (= ["SELECT count(x3), count(x0) FROM x_values LEFT JOIN LATERAL (SELECT (CASE WHEN x > 3 THEN x END) AS x3, (CASE WHEN x > 0 THEN x END) AS x0) z ON true"]
+  (is (= ["SELECT count(x3), count(x0) FROM x_values LEFT JOIN LATERAL (SELECT (CASE WHEN x > ? THEN x END) AS x3, (CASE WHEN x > ? THEN x END) AS x0) z ON true" 3 0]
          (-> (select :%count.x3
                      :%count.x0)
              (from :x-values)
              (left-join-lateral [(select
-                                  [(case-when [:> :x (sql/inline 3)] :x) :x3]
-                                  [(case-when [:> :x (sql/inline 0)] :x) :x0]) :z] :true)
+                                  [(case-when [:> :x 3] :x) :x3]
+                                  [(case-when [:> :x 0] :x) :x0]) :z] :true)
              sql/format))))
