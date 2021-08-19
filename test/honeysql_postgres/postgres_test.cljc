@@ -18,6 +18,7 @@
               drop-column
               drop-extension
               drop-table
+              explain
               filter
               insert-into-as
               on-conflict
@@ -354,6 +355,7 @@
              (within-group [(sql/call :percentile_disc (hsql-types/array [0.25 0.5 0.75])) (order-by :s.i) :alias])
              (from (sql/raw "generate_series(1,10) AS s(i)"))
              (sql/format)))))
+
 (deftest create-extension-test
   (testing "create extension"
     (is (= ["CREATE EXTENSION \"uuid-ossp\""]
@@ -372,3 +374,66 @@
            (-> (drop-extension :uuid-ossp)
                (sql/format :allow-dashed-names? true
                            :quoting :ansi))))))
+
+(deftest explain-test
+  (let [query (-> (select :*)
+                  (from :products))]
+    (testing "EXPLAIN without any arguments"
+      (is (= ["EXPLAIN SELECT * FROM products"]
+             (-> query (explain) (sql/format)))))
+
+    (testing "Explain with analyze"
+      (is (= ["EXPLAIN ANALYZE SELECT * FROM products"]
+             (-> query (explain {:analyze true}) (sql/format)))))
+
+    (testing "Explain with analyze verbose"
+      (is (= ["EXPLAIN ANALYZE VERBOSE SELECT * FROM products"]
+             (-> query (explain {:analyze true :verbose true}) (sql/format))))
+      (is (= ["EXPLAIN ANALYZE VERBOSE SELECT * FROM products"]
+             (-> query (explain {:verbose true :analyze true}) (sql/format)))))
+
+    (testing "Explain with costs"
+      (is (= ["EXPLAIN (COSTS TRUE) SELECT * FROM products"]
+             (-> query (explain {:costs true}) (sql/format))))
+      (is (= ["EXPLAIN (COSTS FALSE) SELECT * FROM products"]
+             (-> query (explain {:costs false}) (sql/format)))))
+
+    (testing "Explain with settings"
+      (is (= ["EXPLAIN (SETTINGS TRUE) SELECT * FROM products"]
+             (-> query (explain {:settings true}) (sql/format))))
+      (is (= ["EXPLAIN (SETTINGS FALSE) SELECT * FROM products"]
+             (-> query (explain {:settings false}) (sql/format)))))
+
+    (testing "Explain with buffers"
+      (is (= ["EXPLAIN (BUFFERS TRUE) SELECT * FROM products"]
+             (-> query (explain {:buffers true}) (sql/format))))
+      (is (= ["EXPLAIN (BUFFERS FALSE) SELECT * FROM products"]
+             (-> query (explain {:buffers false}) (sql/format)))))
+
+    (testing "Explain with wal"
+      (is (= ["EXPLAIN (WAL TRUE) SELECT * FROM products"]
+             (-> query (explain {:wal true}) (sql/format))))
+      (is (= ["EXPLAIN (WAL FALSE) SELECT * FROM products"]
+             (-> query (explain {:wal false}) (sql/format)))))
+
+    (testing "Explain with timing"
+      (is (= ["EXPLAIN (TIMING TRUE) SELECT * FROM products"]
+             (-> query (explain {:timing true}) (sql/format))))
+      (is (= ["EXPLAIN (TIMING FALSE) SELECT * FROM products"]
+             (-> query (explain {:timing false}) (sql/format)))))
+
+    (testing "Explain with summary"
+      (is (= ["EXPLAIN (SUMMARY TRUE) SELECT * FROM products"]
+             (-> query (explain {:summary true}) (sql/format))))
+      (is (= ["EXPLAIN (SUMMARY FALSE) SELECT * FROM products"]
+             (-> query (explain {:summary false}) (sql/format)))))
+
+    (testing "Explain with format"
+      (is (= ["EXPLAIN (FORMAT TEXT) SELECT * FROM products"]
+             (-> query (explain {:format :text}) (sql/format))))
+      (is (= ["EXPLAIN (FORMAT XML) SELECT * FROM products"]
+             (-> query (explain {:format :xml}) (sql/format))))
+      (is (= ["EXPLAIN (FORMAT JSON) SELECT * FROM products"]
+             (-> query (explain {:format :json}) (sql/format))))
+      (is (= ["EXPLAIN (FORMAT YAML) SELECT * FROM products"]
+             (-> query (explain {:format :yaml}) (sql/format)))))))

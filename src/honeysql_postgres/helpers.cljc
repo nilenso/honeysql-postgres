@@ -83,3 +83,6 @@
 
 (defhelper drop-extension [m extension-name]
   (assoc m :drop-extension (sqlh/collify extension-name)))
+
+(defhelper explain [m args]
+  (assoc m :explain args))

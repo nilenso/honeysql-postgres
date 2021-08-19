@@ -31,7 +31,8 @@
 
 (def ^:private postgres-clause-priorities
   "Determines the order that clauses will be placed within generated SQL"
-  (merge {:with 30
+  (merge {:explain 20
+          :with 30
           :with-recursive 40
           :except 45
           :except-all 45
@@ -297,3 +298,35 @@
        (-> extension-name
            util/get-first
            sqlf/to-sql)))
+
+(defmethod format-clause :explain [[_ [params]] _]
+  (if (empty? params)
+    "EXPLAIN"
+    (let [params-string-map
+          {:costs "COSTS"
+           :settings "SETTINGS"
+           :buffers "BUFFERS"
+           :wal "WAL"
+           :timing "TIMING"
+           :summary "SUMMARY"}
+
+          format-string-map
+          {:text "TEXT"
+           :xml "XML"
+           :json "JSON"
+           :yaml "YAML"}
+
+          ->param-string
+          (fn [[k v]]
+            (when-let [param-name (params-string-map k)]
+              (sqlf/paren-wrap
+               (sqlf/space-join [param-name (if (true? v) "TRUE" "FALSE")]))))]
+
+      (sqlf/space-join
+       (remove nil?
+               (concat ["EXPLAIN"
+                        (when (:analyze params) "ANALYZE")
+                        (when (:verbose params) "VERBOSE")
+                        (when-let [format-type (:format params)]
+                          (sqlf/paren-wrap (str "FORMAT" " " (format-string-map format-type))))]
+                       (map ->param-string params)))))))
