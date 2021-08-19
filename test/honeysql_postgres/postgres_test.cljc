@@ -367,7 +367,7 @@
                            :quoting :ansi))))))
 
 (deftest drop-extension-test
-  (testing "create extension"
+  (testing "drop extension"
     (is (= ["DROP EXTENSION \"uuid-ossp\""]
            (-> (drop-extension :uuid-ossp)
                (sql/format :allow-dashed-names? true
