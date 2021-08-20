@@ -240,6 +240,31 @@ The `ilike` and `not-ilike` operators can be used to query data using a pattern 
     0.25 0.50 0.75]
 ```
 
+### explain
+`EXPLAIN` is used to show the execution plan of a statement
+
+``` clojure
+(-> (select :*)
+    (from :products)
+    (explain)
+    (sql/format))
+=> ["EXPLAIN SELECT * FROM PRODUCTS"]
+
+(-> (select :*)
+    (from :products)
+    (explain {:analzye true :verbose true})
+    (sql/format))
+=> ["EXPLAIN ANALZYE VERBOSE SELECT * FROM PRODUCTS"]
+
+(-> (select :*)
+    (from :products)
+    (explain {:format :json})
+    (sql/format))
+=> ["EXPLAIN (FORMAT JSON) SELECT * FROM PRODUCTS"]
+```
+
+
+
 ### SQL functions
 
 The following are the SQL functions added in `honeysql-postgres`
