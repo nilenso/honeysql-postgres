@@ -299,34 +299,33 @@
            util/get-first
            sqlf/to-sql)))
 
+(def ^:private explain-params->string
+  {:costs "COSTS"
+   :settings "SETTINGS"
+   :buffers "BUFFERS"
+   :wal "WAL"
+   :timing "TIMING"
+   :summary "SUMMARY"})
+
+(def ^:private explain-format->string
+  {:text "TEXT"
+   :xml "XML"
+   :json "JSON"
+   :yaml "YAML"})
+
+(defn- ->explain-boolean-param-string [param value]
+  (when-let [param-string (explain-params->string param)]
+    (sqlf/paren-wrap
+     (sqlf/space-join [param-string (if (true? value) "TRUE" "FALSE")]))))
+
 (defmethod format-clause :explain [[_ [params]] _]
   (if (empty? params)
     "EXPLAIN"
-    (let [params-string-map
-          {:costs "COSTS"
-           :settings "SETTINGS"
-           :buffers "BUFFERS"
-           :wal "WAL"
-           :timing "TIMING"
-           :summary "SUMMARY"}
-
-          format-string-map
-          {:text "TEXT"
-           :xml "XML"
-           :json "JSON"
-           :yaml "YAML"}
-
-          ->param-string
-          (fn [[k v]]
-            (when-let [param-name (params-string-map k)]
-              (sqlf/paren-wrap
-               (sqlf/space-join [param-name (if (true? v) "TRUE" "FALSE")]))))]
-
-      (sqlf/space-join
-       (remove nil?
-               (concat ["EXPLAIN"
-                        (when (:analyze params) "ANALYZE")
-                        (when (:verbose params) "VERBOSE")
-                        (when-let [format-type (:format params)]
-                          (sqlf/paren-wrap (str "FORMAT" " " (format-string-map format-type))))]
-                       (map ->param-string params)))))))
+    (sqlf/space-join
+     (remove nil?
+             (concat ["EXPLAIN"
+                      (when (:analyze params) "ANALYZE")
+                      (when (:verbose params) "VERBOSE")
+                      (when-let [format-type (:format params)]
+                        (sqlf/paren-wrap (str "FORMAT" " " (explain-format->string format-type))))]
+                     (map (partial apply ->explain-boolean-param-string) params))))))
